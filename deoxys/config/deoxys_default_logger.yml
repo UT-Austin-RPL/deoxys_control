@@ -1,0 +1,58 @@
+version: 1
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_brief:
+    format: "[Deoxys %(levelname)s] %(asctime)s - %(message)s"
+  deoxys_console_brief: 
+    class: deoxys.utils.log_utils.DeoxysColorFormatter
+  deoxys_example_console_brief: 
+    class: deoxys.utils.log_utils.DeoxysExampleColorFormatter
+  project_console_brief:
+    class: deoxys.utils.log_utils.ProjectColorFormatter
+handlers:
+  deoxys_console:
+    class : logging.StreamHandler
+    formatter: deoxys_console_brief
+    stream  : ext://sys.stdout
+  deoxys_example_console:
+    class : logging.StreamHandler
+    formatter: deoxys_example_console_brief
+    stream  : ext://sys.stdout
+  project_console:
+    class : logging.StreamHandler
+    formatter: project_console_brief
+    stream  : ext://sys.stdout
+  console:
+    class : logging.StreamHandler
+    formatter: simple
+    level   : CRITICAL
+    stream  : ext://sys.stdout
+  file:
+    class : logging.FileHandler
+    level: DEBUG
+    formatter: file_brief
+    filename: logs/debug.log
+  error:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: file_brief
+    filename: logs/error.log
+    maxBytes: 10485760
+    backupCount: 20
+    encoding: utf8
+
+loggers:
+  deoxys:
+    level: INFO
+    handlers: [deoxys_console, file, error]
+  deoxys_examples:
+    level: INFO
+    handlers: [deoxys_example_console, file, error]
+  project:
+    level: INFO
+    handlers: [project_console, file, error]
+
+root:
+  level: FATAL
+  handlers: [console, error]

@@ -1,0 +1,11 @@
+pyzmq
+PyYAML
+easydict
+google-api-python-client
+pybullet
+numpy
+hidapi
+glfw
+numba
+termcolor
+

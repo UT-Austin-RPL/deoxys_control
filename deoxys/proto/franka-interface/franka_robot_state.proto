@@ -1,0 +1,124 @@
+syntax = 'proto3';
+
+message FrankaGripperStateMessage {
+  message Duration {
+    double toSec = 1;
+    uint64 toMSec = 2;
+  }
+  double width = 1;
+  double max_width = 2;
+  bool is_grasped = 3;
+  uint32 temperature = 4;
+  Duration time = 5;
+}
+
+message FrankaRobotStateMessage {
+  repeated double O_T_EE = 1;
+  repeated double O_T_EE_d = 2;
+  repeated double F_T_EE = 3;
+  repeated double F_T_NE = 4;
+  repeated double NE_T_EE = 5;
+  repeated double EE_T_K = 6;
+  double m_ee = 7;
+  repeated double I_ee = 8;
+  repeated double F_x_Cee = 9;
+  double m_load = 10;
+  repeated double I_load = 11;
+  repeated double F_x_Cload = 12;
+  double m_total = 13;
+  repeated double I_total = 14;
+  repeated double F_x_Ctotal = 15;
+  repeated double elbow = 16;
+  repeated double elbow_d = 17;
+  repeated double elbow_c = 18;
+  repeated double delbow_c = 19;
+  repeated double ddelbow_c = 20;
+  repeated double tau_J = 21;
+  repeated double tau_J_d = 22;
+  repeated double dtau_J = 23;
+  repeated double q = 24;
+  repeated double q_d = 25;
+  repeated double dq = 26;
+  repeated double dq_d = 27;
+  repeated double ddq_d = 28;
+  repeated double joint_contact = 29;
+  repeated double cartesian_contact = 30;
+  repeated double joint_collision = 31;
+  repeated double cartesian_collision = 32;
+  repeated double tau_ext_hat_filtered = 33;
+  repeated double O_F_ext_hat_K = 34;
+  repeated double K_F_ext_hat_K = 35;
+  repeated double O_dP_EE_d = 36;
+  repeated double O_T_EE_c = 37;
+  repeated double O_dP_EE_c = 38;
+  repeated double O_ddP_EE_c = 39;
+  repeated double theta = 40;
+  repeated double dtheta = 41;
+
+  message Errors {
+    bool joint_position_limits_violation = 1;
+    bool cartesian_position_limits_violation = 2;
+    bool self_collision_avoidance_violation = 3;
+    bool joint_velocity_violation = 4;
+    bool cartesian_velocity_violation = 5;
+    bool force_control_safety_violation = 6;
+    bool joint_reflex = 7;
+    bool cartesian_reflex = 8;
+    bool max_goal_pose_deviation_violation = 9;
+    bool max_path_pose_deviation_violation = 10;
+    bool cartesian_velocity_profile_safety_violation = 11;
+    bool joint_position_motion_generator_start_pose_invalid = 12;
+    bool joint_motion_generator_position_limits_violation = 13;
+    bool joint_motion_generator_velocity_limits_violation = 14;
+    bool joint_motion_generator_velocity_discontinuity = 15;
+    bool joint_motion_generator_acceleration_discontinuity = 16;
+    bool cartesian_position_motion_generator_start_pose_invalid = 17;
+    bool cartesian_motion_generator_elbow_limit_violation = 18;
+    bool cartesian_motion_generator_velocity_limits_violation = 19;
+    bool cartesian_motion_generator_velocity_discontinuity = 20;
+    bool cartesian_motion_generator_acceleration_discontinuity = 21;
+    bool cartesian_motion_generator_elbow_sign_inconsistent = 22;
+    bool cartesian_motion_generator_start_elbow_invalid = 23;
+    bool cartesian_motion_generator_joint_position_limits_violation = 24;
+    bool cartesian_motion_generator_joint_velocity_limits_violation = 25;
+    bool cartesian_motion_generator_joint_velocity_discontinuity = 26;
+    bool cartesian_motion_generator_joint_acceleration_discontinuity = 27;
+    bool cartesian_position_motion_generator_invalid_frame = 28;
+    bool force_controller_desired_force_tolerance_violation = 29;
+    bool controller_torque_discontinuity = 30;
+    bool start_elbow_sign_inconsistent = 31;
+    bool communication_constraints_violation = 32;
+    bool power_limit_violation = 33;
+    bool joint_p2p_insufficient_torque_for_planning = 34;
+    bool tau_j_range_violation = 35;
+    bool instability_detected = 36;
+    bool joint_move_in_wrong_direction = 37;
+  }
+
+  Errors current_errors = 42;
+  Errors last_motion_errors = 43;
+
+  double control_command_success_rate = 44;
+
+  enum RobotMode {
+    Other = 0;
+    Idle = 1;
+    Move = 2;
+    Guiding = 3;
+    Reflex = 4;
+    UserStopped = 5;
+    AutomaticErrorRecovery = 6;
+  }
+
+  RobotMode robot_mode = 45;
+  message Duration {
+    double toSec = 1;
+    uint64 toMSec = 2;
+  }
+
+  Duration time = 46;
+
+  repeated double current_robot_poses_frames = 47;
+
+  uint64 frame = 48;
+}

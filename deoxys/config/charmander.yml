@@ -1,0 +1,40 @@
+PC:
+  NAME: "rosie"
+  IP: 172.16.0.1
+
+NUC:
+  NAME: "charmander"
+  IP: 172.16.0.3
+  PUB_PORT: 5556
+  SUB_PORT: 5555
+  GRIPPER_PUB_PORT: 5558
+  GRIPPER_SUB_PORT: 5557
+
+ROBOT:
+  IP: 172.16.0.2
+
+CONTROL:
+  STATE_PUBLISHER_RATE: 100
+  POLICY_RATE: 20
+  TRAJ_RATE: 500
+  ZMQ_NOBLOCK: true
+
+ARM_LOGGER:
+  CONSOLE:
+    LOGGER_NAME: "arm_logger"
+    LEVEL: "info"
+    USE: true
+  FILE:
+    LOGGER_NAME: "logs/deoxys_control_arm_program.log"
+    LEVEL: "debug"
+    USE: true
+
+GRIPPER_LOGGER:
+  CONSOLE:
+    LOGGER_NAME: "gripper_logger"
+    LEVEL: "info"
+    USE: true
+  FILE:
+    LOGGER_NAME: "logs/deoxys_control_gripper_program.log"
+    LEVEL: "debug"
+    USE: true

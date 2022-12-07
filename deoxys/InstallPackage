@@ -1,0 +1,55 @@
+#!/bin/sh
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+sudo apt install build-essential cmake git libpoco-dev libeigen3-dev -y
+
+# For protoc
+sudo apt-get install autoconf automake libtool curl make g++ unzip -y
+
+# For zmq
+sudo apt-get install libzmq3-dev -y
+
+# download libfranka
+git clone --recursive https://github.com/frankaemika/libfranka
+cd libfranka
+
+echo "Which libfranka version are you going to use? (currently supporting 0.8.0 and 0.9.0, can do 0.10.0 but no guarantee)"
+read version
+echo "chose libfranka ${version}"
+if [[ "$version" != "0.8.0" && "$version" != "0.9.0" && "$version" != "0.10.0" ]]
+then
+    printf "${RED} The version ${version} won't be supported!!! \n ${NC}"
+fi
+git checkout ${version}
+
+git submodule update
+cd ..
+
+# download c++ zmq wrapper
+git clone https://github.com/zeromq/zmqpp.git
+
+# download yaml cpp package
+git clone https://github.com/jbeder/yaml-cpp.git
+
+# download spdlog package
+git clone https://github.com/gabime/spdlog.git
+
+# download protobuf
+git clone --recursive https://github.com/protocolbuffers/protobuf.git
+cd protobuf
+git checkout v3.13.0
+git submodule update
+
+./autogen.sh
+./configure
+make
+make check
+sudo make install
+sudo ldconfig # refresh shared library cache.
+
+# Install other apt packages
+sudo apt install libreadline-dev -y
+sudo apt install bzip2 -y
+sudo apt install libmotif-dev libglfw3 -y

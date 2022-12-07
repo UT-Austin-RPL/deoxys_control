@@ -1,0 +1,154 @@
+syntax = 'proto3';
+import "google/protobuf/any.proto";
+
+// Goal specification for joint space control
+
+message JointGoal {
+  bool is_delta = 1;
+  double q1 = 2;
+  double q2 = 3;
+  double q3 = 4;
+  double q4 = 5;
+  double q5 = 6;
+  double q6 = 7;
+  double q7 = 8;
+}
+
+// Goal specification for task space control
+
+message Goal {
+  bool is_delta = 1;
+  double x = 2;
+  double y = 3;
+  double z = 4;
+
+  double ax = 5;
+  double ay = 6;
+  double az = 7;
+}
+
+// Franka State Estimator Configuration
+
+message ExponentialSmoothingConfig {
+  double alpha_q = 1;
+  double alpha_dq = 2;
+  double alpha_eef = 3;
+  double alpha_eef_vel = 4;
+}
+
+message FrankaStateEstimatorMessage {
+  bool is_estimation = 1;
+  enum EstimatorType {
+    NO_ESTIMATOR = 0;
+    EXPONENTIAL_SMOOTHING_ESTIMATOR = 1;
+  }
+  EstimatorType estimator_type = 2;
+  google.protobuf.Any config = 5;
+}
+
+// Franka OSC Controller Configuration
+
+message FrankaOSCControllerConfig {
+  repeated double residual_mass_vec =
+      1; // The manual residual mass matrix to add on the internal mass matrix
+}
+
+// Franka Gripper control messages
+
+message FrankaGripperHomingMessage { bool homing = 1; }
+
+message FrankaGripperMoveMessage {
+  double width = 1;
+  double speed = 2;
+}
+
+message FrankaGripperStopMessage { bool stop = 1; }
+
+message FrankaGripperGraspMessage {
+  double width = 1;
+  double speed = 2;
+  double force = 3;
+  double epsilon_inner = 4;
+  double epsilon_outer = 5;
+}
+
+// Unified message interface for gripper control
+
+message FrankaGripperControlMessage {
+  bool termination = 1;
+  google.protobuf.Any control_msg = 2;
+}
+
+// Arm control messages
+
+message FrankaDummyControllerMessage {
+  Goal goal = 1;
+  bool termination = 2;
+}
+
+message FrankaOSCPoseControllerMessage {
+  Goal goal = 1;
+  repeated double translational_stiffness = 2;
+  repeated double rotational_stiffness = 3;
+  bool termination = 4;
+  FrankaOSCControllerConfig config = 5;
+}
+
+message FrankaJointPositionControllerMessage {
+  JointGoal goal = 1;
+  double kp_gains = 2;
+  double kd_gains = 3;
+  double speed_factor = 4;
+}
+
+message FrankaJointImpedanceControllerMessage {
+  JointGoal goal = 1;
+  repeated double kp = 2;
+  repeated double kd = 3;
+}
+
+// TODO(Yifeng) Placeholder for now
+
+message FrankaJointVelocityControllerMessage {
+  JointGoal goal = 1;
+  double kp_gains = 2;
+  double kd_gains = 3;
+}
+
+// TODO(Yifeng) Placeholder for now
+
+message FrankaJointTorqueControllerMessage {
+  JointGoal goal = 1;
+  double kp_gains = 2;
+  double kd_gains = 3;
+}
+
+// Unified message interface for arm control
+message FrankaControlMessage {
+  bool termination = 1;
+  enum ControllerType {
+    NO_CONTROL = 0;
+    OSC_POSE = 1;
+    OSC_POSITION = 2;
+    JOINT_POSITION = 3;
+    JOINT_IMPEDANCE = 4;
+    JOINT_VELOCITY = 5;
+    TORQUE = 6;
+    OSC_YAW = 7;
+  }
+  ControllerType controller_type = 2;
+  enum TrajInterpolatorType {
+    NO_OP = 0;
+    LINEAR_POSITION = 1;
+    LINEAR_POSE = 2;
+    MIN_JERK_POSE = 3;
+    SMOOTH_JOINT_POSITION = 4;
+    MIN_JERK_JOINT_POSITION = 5;
+    LINEAR_JOINT_POSITION = 6;
+  }
+  TrajInterpolatorType traj_interpolator_type = 3;
+  double traj_interpolator_time_fraction = 4;
+  google.protobuf.Any control_msg = 5;
+  double timeout = 6;
+  FrankaStateEstimatorMessage state_estimator_msg = 7;
+}

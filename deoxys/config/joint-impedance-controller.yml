@@ -1,0 +1,18 @@
+controller_type: JOINT_IMPEDANCE
+
+is_delta: false
+
+traj_interpolator_cfg:
+  traj_interpolator_type: LINEAR_JOINT_POSITION
+  time_fraction: 0.3
+
+joint_kp: [100., 100., 100., 100., 75., 150., 50.]
+joint_kd: [20., 20., 20., 20., 7.5, 15.0, 5.0]
+
+state_estimator_cfg:
+  is_estimation: true
+  state_estimator_type: EXPONENTIAL_SMOOTHING
+  alpha_q: 0.9
+  alpha_dq: 0.9
+  alpha_eef: 1.0
+  alpha_eef_vel: 1.0
