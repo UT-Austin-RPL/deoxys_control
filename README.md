@@ -5,17 +5,14 @@
 # Deoxys
 [**[Documentation]**](https://ut-austin-rpl.github.io/deoxys-docs/html) &ensp; 
 
-We will change the name when all the changes are complete.
+Deoxys is a light-weight control framework for Franka Emika Panda arm, aiming to facilitate  various robot learning projects.
 
-This repository is designed for light-weight control of Franka Emika Panda arm, targetting at various robot learning projects.
-
-[Currently the infrastructure will focus on Franka Emika Panda
+[Currently the infrastructure focuses on Franka Emika Panda
 robots. This might change in the future.]
 
-We choose zmqpp for C++ wrapper of zmq because it can provide a
-non-blocking api, which is important for communication with robot.
 
-## Citing
+## Cite our codebase
+
 If you use this codebase for your research projects, please cite our codebase based on the following project:
 
 ```
@@ -91,13 +88,15 @@ make -j build_franka=1
 Here is a quick guide to run `Deoxys`.
 
 Under `deoxys_control/deoxys`,  run
-``` shell
-python scripts/run_deoxys_with_spacemouse.py 
-```
-Change 1) spacemouse vendor_id and product_id ([here](https://github.com/UT-Austin-RPL/robot_infra/blob/74eb784013fb713a0c535dd0e983d5a102008e33/deoxys/scripts/run_deoxys_with_spacemouse.py#L14)) 2) robot interface 
-config ([here](https://github.com/UT-Austin-RPL/robot_infra/blob/74eb784013fb713a0c535dd0e983d5a102008e33/deoxys/scripts/run_deoxys_with_spacemouse.py#L17)) if necessary.
 
-You might also check and change the PC / NUC names [here](https://github.com/UT-Austin-RPL/robot_infra/blob/master/deoxys/config/charmander.yml). 
+``` shell
+python examples/run_deoxys_with_space_mouse.py 
+```
+
+Change 1) spacemouse vendor_id and product_id ([here](https://github.com/UT-Austin-RPL/deoxys_control/blob/eb8d69f7f0838389fca81cac6b250ba05fc97f92/deoxys/examples/run_deoxys_with_space_mouse.py#L19)) 2) robot interface 
+config ([here](https://github.com/UT-Austin-RPL/deoxys_control/blob/eb8d69f7f0838389fca81cac6b250ba05fc97f92/deoxys/examples/run_deoxys_with_space_mouse.py#L16)) if necessary.
+
+You might also check and change the PC / NUC names [here](https://github.com/UT-Austin-RPL/deoxys_control/blob/master/deoxys/config/charmander.yml). 
 
 ## Commands on Control PC (Intel NUC)
 
