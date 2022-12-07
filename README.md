@@ -5,7 +5,7 @@
 # Deoxys
 [**[Documentation]**](https://ut-austin-rpl.github.io/deoxys-docs/html) &ensp; 
 
-Deoxys is a light-weight control framework for Franka Emika Panda arm, aiming to facilitate  various robot learning projects.
+Deoxys is a modularized controller library for Franka Emika Panda arm, aiming to facilitate  various robot learning projects. Deoxys comes with user-friendly python interface and real-time controller implementation in C++.
 
 [Currently the infrastructure focuses on Franka Emika Panda
 robots. This might change in the future.]
