@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./shortened_deoxys_title.png">
+<img src="./deoxys_github_logo.png">
 </p>
 
 # Deoxys
