@@ -4,7 +4,7 @@
 
 [**[Documentation]**](https://ut-austin-rpl.github.io/deoxys-docs/html) &ensp; 
 
-Deoxys is a modular, real-time controller library for Franka Emika Panda arm, aiming to facilitate a wide range of robot learning research. Deoxys comes with a user-friendly python interface and real-time controller implementation in C++. If you are a robosuite user, Deoxys APIs provide seamless transfer 
+Deoxys is a modular, real-time controller library for Franka Emika Panda arm, aiming to facilitate a wide range of robot learning research. Deoxys comes with a user-friendly python interface and real-time controller implementation in C++. If you are a [robosuite](https://github.com/ARISE-Initiative/robosuite) user, Deoxys APIs provide seamless transfer 
 from you simulation codebase to real robot experiments!
 
 
