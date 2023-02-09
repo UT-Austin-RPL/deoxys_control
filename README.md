@@ -64,10 +64,6 @@ And install all the python dependencies (feel free to add pull requests if anyth
 pip install -U -r requirements.txt
 ```
 
-Q: We might want to read states faster than the control rate. The best
-way might be run another node and write states into redis buffer?
-
-
 ## Franka Interface - Intel NUC
 
 Franka Interface is the part which is supposed to run on NUC. Run this 
