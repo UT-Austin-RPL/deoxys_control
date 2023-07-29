@@ -22,7 +22,7 @@ If you use this codebase for your research projects, please cite our codebase ba
 @article{zhu2022viola,
   title={VIOLA: Imitation Learning for Vision-Based Manipulation with Object Proposal Priors},
   author={Zhu, Yifeng and Joshi, Abhishek and Stone, Peter and Zhu, Yuke},
-  journal={6th Annual Conference on Robot Learning (CoRL)},
+  journal={arXiv preprint arXiv:2210.11339},
   year={2022}
 }
 ```
