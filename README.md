@@ -23,6 +23,7 @@ If you use this codebase for your research projects, please cite our codebase ba
   title={VIOLA: Imitation Learning for Vision-Based Manipulation with Object Proposal Priors},
   author={Zhu, Yifeng and Joshi, Abhishek and Stone, Peter and Zhu, Yuke},
   journal={arXiv preprint arXiv:2210.11339},
+  doi={10.48550/arXiv.2210.11339},
   year={2022}
 }
 ```
