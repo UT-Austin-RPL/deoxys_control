@@ -31,7 +31,26 @@ inline void PInverse(const Eigen::MatrixXd &M, Eigen::MatrixXd &M_inv,
   M_inv = Eigen::MatrixXd(svd.matrixV() * S_inv * svd.matrixU().transpose());
 }
 
-inline void VelocitySafetyGuardFn(std::array<double, 7> &dq_array,
+inline void CartesianVelocitySafetyGuardFn(std::array<double, 6> &twist_array,
+                                  double min_twist_trans, double max_twist_trans, double min_twist_rot, double max_twist_rot) {
+  for (size_t i = 0; i < 3; i++) {
+    if (twist_array[i] < min_twist_trans) {
+      twist_array[i] = min_twist_trans;
+    } else if (twist_array[i] > max_twist_trans) {
+      twist_array[i] = max_twist_trans;
+    }
+  }
+
+  for (size_t i = 3; i < 6; i++) {
+    if (twist_array[i] < min_twist_rot) {
+      twist_array[i] = min_twist_rot;
+    } else if (twist_array[i] > max_twist_rot) {
+      twist_array[i] = max_twist_rot;
+    }
+  }
+}
+
+inline void JointVelocitySafetyGuardFn(std::array<double, 7> &dq_array,
                                   double min_dq, double max_dq) {
   for (size_t i = 0; i < dq_array.size(); i++) {
     if (dq_array[i] < min_dq) {

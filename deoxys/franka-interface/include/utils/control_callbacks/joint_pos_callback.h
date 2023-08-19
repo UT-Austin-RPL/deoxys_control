@@ -76,6 +76,6 @@ CreateJointPositionCallback(
   };
 }
 
-#endif // UTILS_CONTROL_CALLBACKS_JOINT_POS_CALLBACK_H_
-
 } // NAMESPACE control_callbacks
+
+#endif // UTILS_CONTROL_CALLBACKS_JOINT_POS_CALLBACK_H_
