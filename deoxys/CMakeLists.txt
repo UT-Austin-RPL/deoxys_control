@@ -76,12 +76,15 @@ if (BUILD_FRANKA)
 
   set(FRANKA_LIBS Eigen3::Eigen3 Franka::Franka Threads::Threads zmqpp yaml-cpp spdlog)
 
+  # Add your new controller files here
   set (CONTROLLERS
     franka-interface/src/controllers/osc_impedance.cpp
     franka-interface/src/controllers/osc_position_impedance.cpp
     franka-interface/src/controllers/osc_yaw_impedance.cpp
     franka-interface/src/controllers/joint_position.cpp
-    franka-interface/src/controllers/joint_impedance.cpp)
+    franka-interface/src/controllers/joint_impedance.cpp
+    franka-interface/src/controllers/cartesian_velocity.cpp
+    )
   
   add_library(shared_utils
     franka-interface/src/utils/common_utils.cpp

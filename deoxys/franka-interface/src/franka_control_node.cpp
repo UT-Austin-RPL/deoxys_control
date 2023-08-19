@@ -25,6 +25,7 @@
 // Callback
 #include "utils/control_callbacks/joint_pos_callback.h"
 #include "utils/control_callbacks/torque_callback.h"
+#include "utils/control_callbacks/cartesian_velocity_calllback.h"
 
 // Interpolators
 #include "utils/traj_interpolators/linear_joint_position_traj_interpolator.h"
@@ -33,6 +34,7 @@
 #include "utils/traj_interpolators/min_jerk_joint_position_traj_interpolator.h"
 #include "utils/traj_interpolators/min_jerk_pose_traj_interpolator.h"
 #include "utils/traj_interpolators/smooth_joint_traj_interpolator.h"
+#include "utils/traj_interpolators/null_vel_traj_interpolator.h"
 
 // State estimators
 #include "utils/state_estimators/exponential_smoothing_estimator.h"
@@ -43,6 +45,7 @@
 #include "controllers/osc_impedance.h"
 #include "controllers/osc_position_impedance.h"
 #include "controllers/osc_yaw_impedance.h"
+#include "controllers/cartesian_velocity.h"
 
 #include "franka_controller.pb.h"
 #include "franka_robot_state.pb.h"
@@ -55,7 +58,8 @@ enum ControllerType {
   JOINT_IMPEDANCE,
   JOINT_VELOCITY,
   TORQUE,
-  OSC_YAW
+  OSC_YAW,
+  CARTESIAN_VELOCITY,
 };
 
 enum TrajInterpolatorType {
@@ -66,6 +70,7 @@ enum TrajInterpolatorType {
   SMOOTH_JOINT_POSITION,
   MIN_JERK_JOINT_POSITION,
   LINEAR_JOINT_POSITION,
+  NULL_VELOCITY,
 };
 
 enum StateEstimatorType {
@@ -96,6 +101,9 @@ bool GetControllerType(const FrankaControlMessage &franka_control_msg,
   } else if (franka_control_msg.controller_type() ==
              FrankaControlMessage_ControllerType_TORQUE) {
     controller_type = ControllerType::TORQUE;
+  } else if (franka_control_msg.controller_type() ==           
+             FrankaControlMessage_ControllerType_CARTESIAN_VELOCITY) {
+    controller_type = ControllerType::CARTESIAN_VELOCITY;
   } else if (franka_control_msg.controller_type() ==
              FrankaControlMessage_ControllerType_NO_CONTROL) {
     controller_type = ControllerType::NO_CONTROL;
@@ -126,7 +134,10 @@ bool GetTrajInterpolatorType(const FrankaControlMessage &franka_control_msg,
   } else if (franka_control_msg.traj_interpolator_type() ==
              FrankaControlMessage_TrajInterpolatorType_LINEAR_JOINT_POSITION) {
     traj_interpolator_type = TrajInterpolatorType::LINEAR_JOINT_POSITION;
-  } else {
+  } else if (franka_control_msg.traj_interpolator_type() == FrankaControlMessage_TrajInterpolatorType_NULL_VELOCITY) {
+    traj_interpolator_type = TrajInterpolatorType::NULL_VELOCITY;
+  }
+  else {
     traj_interpolator_type = TrajInterpolatorType::NO_INTERPOLATION;
     return false;
   }
@@ -385,6 +396,11 @@ int main(int argc, char **argv) {
             global_handler->logger->info("Initialize Joint Impedance");
             global_handler->running = true;
           } else if (control_command.controller_type ==
+                         ControllerType::CARTESIAN_VELOCITY &&
+                     controller_type == ControllerType::NO_CONTROL) {
+            global_handler->controller_ptr =
+                std::make_shared<controller::CartesianVelocityController>(model);
+          } else if (control_command.controller_type ==
                          ControllerType::NO_CONTROL ||
                      controller_type == ControllerType::NO_CONTROL) {
             global_handler->running = false;
@@ -440,6 +456,13 @@ int main(int argc, char **argv) {
                   traj_utils::LinearJointPositionTrajInterpolator>();
               global_handler->logger->info(
                   "Initialize Linear Joint Position Trajectory Interpolator");
+            } else if (control_command.traj_interpolator_type == TrajInterpolatorType::NULL_VELOCITY) {
+              global_handler->traj_interpolator_ptr = std::make_shared<
+                  traj_utils::NullVelTrajInterpolator>();
+              global_handler->logger->info(
+                  "No Trajectory Interpolator Used For Velocity Control");
+            } else {
+              global_handler->logger->error("No interpolator is specified");
             }
 
             traj_interpolator_type = control_command.traj_interpolator_type;
@@ -466,6 +489,14 @@ int main(int argc, char **argv) {
             global_handler->traj_interpolator_ptr->Reset(
                 global_handler->time, current_state_info->joint_positions,
                 goal_state_info->joint_positions, policy_rate, traj_rate,
+                global_handler->traj_interpolator_time_fraction);
+            break;
+          case TrajInterpolatorType::NULL_VELOCITY:
+            global_handler->traj_interpolator_ptr->Reset(
+                global_handler->time, current_state_info->twist_trans_EE_in_base_frame,
+                current_state_info->twist_rot_EE_in_base_frame,
+                goal_state_info->twist_trans_EE_in_base_frame,
+                goal_state_info->twist_rot_EE_in_base_frame, policy_rate, traj_rate,
                 global_handler->traj_interpolator_time_fraction);
             break;
           default:
@@ -514,6 +545,11 @@ int main(int argc, char **argv) {
         } else if (controller_type == ControllerType::JOINT_POSITION) {
           global_handler->logger->info("Joint position callback");
           robot.control(control_callbacks::CreateJointPositionCallback(
+              global_handler, state_publisher, model, current_state_info,
+              goal_state_info, policy_rate, traj_rate));
+        } else if (controller_type == ControllerType::CARTESIAN_VELOCITY) {
+          global_handler->logger->info("Cartesian velocity callback");
+          robot.control(control_callbacks::CreateCartesianVelocityCallback(
               global_handler, state_publisher, model, current_state_info,
               goal_state_info, policy_rate, traj_rate));
         }

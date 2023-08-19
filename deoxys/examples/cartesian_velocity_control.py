@@ -1,0 +1,1 @@
+# This is an exmaple to run cartesian velocity control with Deoxys. This controller is useful if your research is mainly about TransporterNet like tasks.
