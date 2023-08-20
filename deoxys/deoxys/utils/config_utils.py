@@ -38,7 +38,6 @@ def robot_config_parse_args(parser=None):
         add_robot_config_arguments(parser)
         add_controller_config_arguments(parser)
 
-
 # Controller configs
 
 
@@ -76,7 +75,7 @@ def get_default_controller_config(controller_type: str) -> EasyDict:
     Returns:
         Type(EasyDict): An easy dictionary of controller configuration
     """
-
+    print(controller_type)
     if controller_type == "OSC_POSE":
         controller_cfg = YamlConfig(
             os.path.join(config_root, "osc-pose-controller.yml")
@@ -106,7 +105,7 @@ def get_default_controller_config(controller_type: str) -> EasyDict:
         ).as_easydict()
         controller_cfg = verify_controller_config(controller_cfg)
     elif controller_type == "CARTESIAN_VELOCITY":
-        controller_type = YamlConfig(
+        controller_cfg = YamlConfig(
             os.path.join(config_root, "cartesian-velocity-controller.yml")
         ).as_easydict()
     return controller_cfg
