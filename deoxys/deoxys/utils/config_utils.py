@@ -31,10 +31,12 @@ def robot_config_parse_args(parser=None):
     if parser is None:
         parser = argparse.ArgumentParser()
         add_robot_config_arguments(parser)
+        add_controller_config_arguments(parser)
         args = parser.parse_args()
         return args
     else:
         add_robot_config_arguments(parser)
+        add_controller_config_arguments(parser)
 
 
 # Controller configs
