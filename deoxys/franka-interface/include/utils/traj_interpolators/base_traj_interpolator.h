@@ -23,6 +23,16 @@ public:
   inline virtual void GetNextStep(const double &time_sec, Eigen::Vector3d &p_t,
                                   Eigen::Quaterniond &q_t){};
 
+  // For cartesian velocity
+  inline virtual void Reset(const double &time_sec, 
+                            const Eigen::Vector3d &twist_trans_start,
+                            const Eigen::Vector3d &twist_rot_start,
+                            const Eigen::Vector3d &twist_trans_goal,
+                            const Eigen::Vector3d &twist_rot_goal,
+                            const int &policy_rate, const int &rate,
+                            const double &traj_interpolator_time_fraction) {};
+  inline virtual void GetNextStep(const double &time_sec, Eigen::Vector3d &twist_trans_t, Eigen::Vector3d &twist_rot_t) {};
+
   // For joints
   inline virtual void Reset(const double &time_sec,
                             const Eigen::Matrix<double, 7, 1> &j_start,

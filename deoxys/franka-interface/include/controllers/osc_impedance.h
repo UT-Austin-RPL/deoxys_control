@@ -28,8 +28,6 @@ public:
 
   bool ParseMessage(const FrankaControlMessage &msg);
 
-  // void ComputeGoal(const Eigen::Vector3d&, const Eigen::Quaterniond&,
-  // Eigen::Vector3d&, Eigen::Quaterniond&);
   void ComputeGoal(const std::shared_ptr<StateInfo> &state_info,
                    std::shared_ptr<StateInfo> &goal_info);
 

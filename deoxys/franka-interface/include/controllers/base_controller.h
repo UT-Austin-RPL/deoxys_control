@@ -34,14 +34,18 @@ public:
 
   inline virtual void ComputeGoal(const std::shared_ptr<StateInfo> &state_info,
                                   std::shared_ptr<StateInfo> &goal_info){};
-  // inline virtual void ComputeGoal(const Eigen::Vector3d&, const
-  // Eigen::Quaterniond&, Eigen::Vector3d&, Eigen::Quaterniond&) {}; inline
-  // virtual void ComputeGoal(const Eigen::Matrix<double, 7, 1>&,
-  // Eigen::Matrix<double, 7, 1>&) {};
 
+  // For pose
   inline virtual std::array<double, 7> Step(const franka::RobotState &,
                                             const Eigen::Vector3d &,
                                             const Eigen::Quaterniond &){};
+
+  // For cartesian velocity
+  inline virtual std::array<double, 6> Step(const franka::RobotState &,
+                                            const Eigen::Vector3d &,
+                                            const Eigen::Vector3d &){};
+
+  // For joints
   inline virtual std::array<double, 7>
   Step(const franka::RobotState &, const Eigen::Matrix<double, 7, 1> &){};
 

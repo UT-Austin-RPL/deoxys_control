@@ -24,6 +24,12 @@ struct SharedMemory {
   std::atomic<double> max_torque;
   std::atomic<double> min_torque;
 
+  // for velocity control
+  std::atomic<double> max_trans_speed;
+  std::atomic<double> min_trans_speed;
+  std::atomic<double> max_rot_speed;
+  std::atomic<double> min_rot_speed;
+
   // for trajectory interpolation
   double traj_interpolator_time_fraction = 1.0;
 

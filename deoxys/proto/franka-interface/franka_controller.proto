@@ -109,7 +109,9 @@ message FrankaJointImpedanceControllerMessage {
 
 message FrankaCartesianVelocityControllerMessage {
   Goal goal = 1;
-  double speed_factor=2;
+  double kp_gains = 2;
+  double kd_gains = 3;
+  double speed_factor=4;
 }
 
 // TODO(Yifeng) Placeholder for now

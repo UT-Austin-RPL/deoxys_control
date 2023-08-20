@@ -34,7 +34,7 @@
 #include "utils/traj_interpolators/min_jerk_joint_position_traj_interpolator.h"
 #include "utils/traj_interpolators/min_jerk_pose_traj_interpolator.h"
 #include "utils/traj_interpolators/smooth_joint_traj_interpolator.h"
-#include "utils/traj_interpolators/null_vel_traj_interpolator.h"
+#include "utils/traj_interpolators/null_velocity_traj_interpolator.h"
 
 // State estimators
 #include "utils/state_estimators/exponential_smoothing_estimator.h"
@@ -244,10 +244,22 @@ int main(int argc, char **argv) {
         std::make_shared<SharedMemory>();
     global_handler->logger = log_utils::get_logger(
         config["ARM_LOGGER"]["CONSOLE"]["LOGGER_NAME"].as<std::string>());
+    
+    // Read torque limits from the global config
     global_handler->max_torque =
         control_config["CONTROL"]["SAFETY"]["MAX_TORQUE"].as<double>();
     global_handler->min_torque =
         control_config["CONTROL"]["SAFETY"]["MIN_TORQUE"].as<double>();
+
+    // Read speed limits from the global config
+    global_handler->max_trans_speed =
+        control_config["CONTROL"]["SAFETY"]["MAX_TRANS_SPEED"].as<double>();
+    global_handler->min_trans_speed =
+        control_config["CONTROL"]["SAFETY"]["MIN_TRANS_SPEED"].as<double>();
+    global_handler->max_rot_speed =
+        control_config["CONTROL"]["SAFETY"]["MAX_ROT_SPEED"].as<double>();
+    global_handler->min_rot_speed =
+        control_config["CONTROL"]["SAFETY"]["MIN_ROT_SPEED"].as<double>();
 
     std::shared_ptr<StateInfo> current_state_info =
         std::make_shared<StateInfo>();
@@ -458,7 +470,7 @@ int main(int argc, char **argv) {
                   "Initialize Linear Joint Position Trajectory Interpolator");
             } else if (control_command.traj_interpolator_type == TrajInterpolatorType::NULL_VELOCITY) {
               global_handler->traj_interpolator_ptr = std::make_shared<
-                  traj_utils::NullVelTrajInterpolator>();
+                  traj_utils::NullVelocityTrajInterpolator>();
               global_handler->logger->info(
                   "No Trajectory Interpolator Used For Velocity Control");
             } else {
@@ -533,23 +545,27 @@ int main(int argc, char **argv) {
         if (controller_type == ControllerType::OSC_POSE ||
             controller_type == ControllerType::OSC_POSITION ||
             controller_type == ControllerType::OSC_YAW) {
+          // OSC control callback
           robot.control(
               control_callbacks::CreateTorqueFromCartesianSpaceCallback(
                   global_handler, state_publisher, model, current_state_info,
                   goal_state_info, policy_rate, traj_rate));
         } else if (controller_type == ControllerType::JOINT_IMPEDANCE) {
+          // Joint Impedance control callback
           global_handler->logger->info("Joint impedance callback");
           robot.control(control_callbacks::CreateTorqueFromJointSpaceCallback(
               global_handler, state_publisher, model, current_state_info,
               goal_state_info, policy_rate, traj_rate));
         } else if (controller_type == ControllerType::JOINT_POSITION) {
+          // Joint Position control callback
           global_handler->logger->info("Joint position callback");
           robot.control(control_callbacks::CreateJointPositionCallback(
               global_handler, state_publisher, model, current_state_info,
               goal_state_info, policy_rate, traj_rate));
         } else if (controller_type == ControllerType::CARTESIAN_VELOCITY) {
+          // Cartesian Velocity control callback
           global_handler->logger->info("Cartesian velocity callback");
-          robot.control(control_callbacks::CreateCartesianVelocityCallback(
+          robot.control(control_callbacks::CreateCartesianVelocitiesCallback(
               global_handler, state_publisher, model, current_state_info,
               goal_state_info, policy_rate, traj_rate));
         }
