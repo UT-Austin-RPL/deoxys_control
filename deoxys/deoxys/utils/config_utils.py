@@ -55,10 +55,14 @@ def get_available_controller_configs(config_folder: str = None, verbose: bool = 
     """
     if config_folder is None:
         config_folder = config_root
+    config_dict = {}
     for config_file_name in Path(config_folder).glob("*controller.yml"):
-        print("Found file: ", config_file_name)
         if verbose:
+            print("Found file: ", config_file_name)
             print_controller_config_from_file(config_file_name)
+        config = YamlConfig(config_file_name).as_easydict()
+        config_dict[config["controller_type"]] = config
+    return config_dict
 
 
 def get_default_controller_config(controller_type: str) -> EasyDict:
@@ -99,6 +103,10 @@ def get_default_controller_config(controller_type: str) -> EasyDict:
             os.path.join(config_root, "joint-position-controller.yml")
         ).as_easydict()
         controller_cfg = verify_controller_config(controller_cfg)
+    elif controller_type == "CARTESIAN_VELOCITY":
+        controller_type = YamlConfig(
+            os.path.join(config_root, "cartesian-velocity-controller.yml")
+        ).as_easydict()
     return controller_cfg
 
 
@@ -204,6 +212,16 @@ def verify_controller_config(controller_cfg: dict, use_default=True):
             }
             logger.warning("field traj_interpolator_cfg not specified!!!")
             field_missing = True
+    
+    elif controller_cfg["controller_type"] == "CARTESIAN_VELOCITY":
+        if not check_attr(controller_cfg, "traj_interpolator_cfg"):
+            controller_cfg["traj_interpolator_cfg"] = {
+                "traj_interpolater_type": "NULL_VELOCITY",
+                "time_fraction": 0.3,
+            }
+            logger.warning("field traj_interpolator_cfg not specified!!!")
+            field_missing = True
+    
     if field_missing and not use_default:
         logger.error(
             "Some field in controller is not specified and default config option is not turned on!!!"
