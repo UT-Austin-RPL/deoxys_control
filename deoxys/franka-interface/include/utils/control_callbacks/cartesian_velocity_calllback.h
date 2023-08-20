@@ -16,16 +16,16 @@
 
 namespace control_callbacks {
     
-    std::function<franka::CartesianVelocityocities(const franka::RobotState &,
+    std::function<franka::CartesianVelocities(const franka::RobotState &,
                                                franka::Duration)>
-    CreateCartesianVelocityocityCallback(
+    CreateCartesianVelocitiesCallback(
         const std::shared_ptr<SharedMemory> &global_handler,
         const std::shared_ptr<robot_utils::StatePublisher> state_publisher,
         const franka::Model &model, std::shared_ptr<StateInfo> &current_state_info,
         std::shared_ptr<StateInfo> &goal_state_info, const int &policy_rate,
         const int &traj_rate) {
             return [&global_handler, &state_publisher, &model, &current_state_info, &goal_state_info, &policy_rate, &traj_rate](const franka::RobotState &robot_state,
-            franka::Duration period) -> franka::CartesianVelocityocities {
+            franka::Duration period) -> franka::CartesianVelocities {
                 std::chrono::high_resolution_clock::time_point t1 =
                     std::chrono::high_resolution_clock::now();
 
@@ -40,8 +40,8 @@ namespace control_callbacks {
                     Eigen::Quaterniond(current_T_EE_in_base_frame.linear());
 
                 if (!global_handler->running) {
-                franka::CartesianVelocityocities zero_VELOCITYocities{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-                return franka::MotionFinished(zero_VELOCITYocities);
+                franka::CartesianVelocities zero_velocities{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+                return franka::MotionFinished(zero_velocities);
                 }
 
                 std::array<double, 6> vel_d_array{};
@@ -50,7 +50,7 @@ namespace control_callbacks {
                     0., current_state_info->twist_trans_EE_in_base_frame,
                     current_state_info->twist_rot_EE_in_base_frame,
                     goal_state_info->twist_trans_EE_in_base_frame,
-                    goal_state_info->twist_quat_EE_in_base_frame, policy_rate, traj_rate,
+                    goal_state_info->twist_rot_EE_in_base_frame, policy_rate, traj_rate,
                     global_handler->traj_interpolator_time_fraction);
                 }
                 global_handler->time += period.toSec();
@@ -59,7 +59,7 @@ namespace control_callbacks {
                 Eigen::Vector3d desired_twist_rot_EE_in_base_frame;
 
                 global_handler->traj_interpolator_ptr->GetNextStep(
-                    global_handler->time, desired_pos_EE_in_base_frame,
+                    global_handler->time, desired_twist_trans_EE_in_base_frame,
                     desired_twist_rot_EE_in_base_frame);
 
                 state_publisher->UpdateNewState(robot_state, &model);
@@ -68,7 +68,13 @@ namespace control_callbacks {
                     robot_state, desired_twist_trans_EE_in_base_frame,
                     desired_twist_rot_EE_in_base_frame);
 
-                // (TODO): Maybe we need to limit the velocity commands within some safety threshold (Function defined in control_utils::CartesianVelocitySafetyGuardFn)
+                // (TODO): Maybe we need to limit the velocity commands within some safety threshold (Function defined in control_utils::CartesianVelocitiesSafetyGuardFn)
+                control_utils::CartesianVelocitySafetyGuardFn(vel_d_array,
+                                                                global_handler->min_trans_speed,
+                                                                global_handler->max_trans_speed,
+                                                                global_handler->min_rot_speed,
+                                                                global_handler->max_rot_speed
+                );
 
                 std::chrono::high_resolution_clock::time_point t2 =
                     std::chrono::high_resolution_clock::now();
@@ -76,7 +82,7 @@ namespace control_callbacks {
                 // global_handler->logger->debug("{0} microseconds" , time.count());
 
                 return vel_d_array;
-            }
+            };
         }
 } // namespace control_callbacks
 

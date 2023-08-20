@@ -32,7 +32,10 @@ inline void PInverse(const Eigen::MatrixXd &M, Eigen::MatrixXd &M_inv,
 }
 
 inline void CartesianVelocitySafetyGuardFn(std::array<double, 6> &twist_array,
-                                  double min_twist_trans, double max_twist_trans, double min_twist_rot, double max_twist_rot) {
+                                  double min_twist_trans, 
+                                  double max_twist_trans, 
+                                  double min_twist_rot, 
+                                  double max_twist_rot) {
   for (size_t i = 0; i < 3; i++) {
     if (twist_array[i] < min_twist_trans) {
       twist_array[i] = min_twist_trans;

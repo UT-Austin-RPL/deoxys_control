@@ -7,7 +7,25 @@
 
 namespace controller {
 class CartesianVelocityController : public BaseController {
+protected:
+  FrankaCartesianVelocityControllerMessage control_msg_;
 
+  double speed_factor_;
+
+public:
+  CartesianVelocityController();
+  CartesianVelocityController(franka::Model &model);
+
+  ~CartesianVelocityController();
+
+  bool ParseMessage(const FrankaControlMessage &msg);
+
+  void ComputeGoal(const std::shared_ptr<StateInfo> &state_info,
+                   std::shared_ptr<StateInfo> &goal_info);
+
+  std::array<double, 6> Step(const franka::RobotState &,
+                             const Eigen::Vector3d &,
+                             const Eigen::Vector3d &);
 };
 
 } // namespace controller

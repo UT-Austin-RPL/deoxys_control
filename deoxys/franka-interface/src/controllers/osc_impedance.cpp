@@ -111,7 +111,6 @@ std::array<double, 7> OSCImpedanceController::Step(
   std::chrono::high_resolution_clock::time_point t1 =
       std::chrono::high_resolution_clock::now();
 
-  FrankaOSCPoseControllerMessage control_msg;
   Eigen::Matrix<double, 7, 1> tau_d;
 
   std::array<double, 49> mass_array = model_->mass(robot_state);
