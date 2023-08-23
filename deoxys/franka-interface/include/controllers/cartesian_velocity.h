@@ -26,6 +26,8 @@ public:
   std::array<double, 6> Step(const franka::RobotState &,
                              const Eigen::Vector3d &,
                              const Eigen::Vector3d &);
+  void EstimateVelocities(const franka::RobotState &robot_state,
+                          std::shared_ptr<StateInfo> &);
 };
 
 } // namespace controller

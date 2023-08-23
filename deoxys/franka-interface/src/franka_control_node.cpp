@@ -412,6 +412,8 @@ int main(int argc, char **argv) {
                      controller_type == ControllerType::NO_CONTROL) {
             global_handler->controller_ptr =
                 std::make_shared<controller::CartesianVelocityController>(model);
+            global_handler->logger->info("Initialize Cartesian Velocity");
+            global_handler->running = true;            
           } else if (control_command.controller_type ==
                          ControllerType::NO_CONTROL ||
                      controller_type == ControllerType::NO_CONTROL) {
@@ -540,7 +542,6 @@ int main(int argc, char **argv) {
         state_publisher->UpdateNewState(init_state, &model);
         if (controller_type == ControllerType::NO_CONTROL)
           continue;
-
         // Choose which control callback functions
         if (controller_type == ControllerType::OSC_POSE ||
             controller_type == ControllerType::OSC_POSITION ||

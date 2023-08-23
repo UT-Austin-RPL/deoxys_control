@@ -56,6 +56,9 @@ public:
   };
 
   inline void ResetStateEstimator() { this->state_estimator_ptr_->Reset(); }
+
+  inline virtual void EstimateVelocities(const franka::RobotState &,
+                          std::shared_ptr<StateInfo> &) {};
 };
 } // NAMESPACE controller
 

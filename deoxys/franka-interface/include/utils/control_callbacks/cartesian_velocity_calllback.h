@@ -34,11 +34,13 @@ namespace control_callbacks {
                 Eigen::Affine3d current_T_EE_in_base_frame(
                     Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
 
+                global_handler->controller_ptr->EstimateVelocities(robot_state, current_state_info);
+
                 current_state_info->pos_EE_in_base_frame
                     << current_T_EE_in_base_frame.translation();
                 current_state_info->quat_EE_in_base_frame =
                     Eigen::Quaterniond(current_T_EE_in_base_frame.linear());
-
+                
                 if (!global_handler->running) {
                 franka::CartesianVelocities zero_velocities{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
                 return franka::MotionFinished(zero_velocities);
@@ -61,13 +63,15 @@ namespace control_callbacks {
                 global_handler->traj_interpolator_ptr->GetNextStep(
                     global_handler->time, desired_twist_trans_EE_in_base_frame,
                     desired_twist_rot_EE_in_base_frame);
+                std::cout << "Goal: " << goal_state_info->twist_trans_EE_in_base_frame.transpose() << std::endl;
+                std::cout << "Desired: " << desired_twist_trans_EE_in_base_frame.transpose() << std::endl;
 
                 state_publisher->UpdateNewState(robot_state, &model);
 
                 vel_d_array = global_handler->controller_ptr->Step(
                     robot_state, desired_twist_trans_EE_in_base_frame,
                     desired_twist_rot_EE_in_base_frame);
-
+                std::cout << vel_d_array[0] << std::endl;
                 // (TODO): Maybe we need to limit the velocity commands within some safety threshold (Function defined in control_utils::CartesianVelocitiesSafetyGuardFn)
                 control_utils::CartesianVelocitySafetyGuardFn(vel_d_array,
                                                                 global_handler->min_trans_speed,
@@ -75,12 +79,12 @@ namespace control_callbacks {
                                                                 global_handler->min_rot_speed,
                                                                 global_handler->max_rot_speed
                 );
-
+                std::cout << vel_d_array[0] << ", " << vel_d_array[1] << ", " << vel_d_array[2] << ", " << vel_d_array[3] << ", " << vel_d_array[4] << ", " << vel_d_array[5] << std::endl;
                 std::chrono::high_resolution_clock::time_point t2 =
                     std::chrono::high_resolution_clock::now();
                 auto time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-                // global_handler->logger->debug("{0} microseconds" , time.count());
-
+                global_handler->logger->info("{0} microseconds" , time.count());
+                std::cout << vel_d_array[0] << std::endl;
                 return vel_d_array;
             };
         }
