@@ -6,6 +6,10 @@ traj_interpolator_cfg:
   traj_interpolator_type: NULL_VELOCITY
   time_fraction: 0.3
 
+action_scale:
+  translation: 1.0
+  rotation: 1.0
+
 state_estimator_cfg:
   is_estimation: false
   state_estimator_type: EXPONENTIAL_SMOOTHING
