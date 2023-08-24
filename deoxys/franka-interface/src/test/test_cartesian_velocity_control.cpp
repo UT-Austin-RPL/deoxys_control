@@ -18,6 +18,7 @@ int main(int argc, char** argv) {
   }
   try {
     franka::Robot robot(argv[1]);
+    robot.automaticErrorRecovery();
     setDefaultBehavior(robot);
     // Set additional parameters always before the control loop, NEVER in the control loop!
     // Set the joint impedance.
@@ -50,52 +51,26 @@ int main(int argc, char** argv) {
                              franka::Duration period) -> franka::CartesianVelocities {
       time += period.toSec();
 
-      double cycle = std::floor(pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
-      double v = cycle * v_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / time_max * time));
-      double v_x = std::cos(angle) * v;
-      double v_z = -std::sin(angle) * v;
+      double v_x, v_z;
+      // double cycle = std::floor(pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
+      if (time < time_max / 2) {
+        double v = v_max / 2.0 * (1.0 - std::cos(M_PI / time_max * time));
+        v_x = std::cos(angle) * v;
+        v_z = -std::sin(angle) * v;
+      }
+      else {
+        double v = v_max / 2.0 * (1.0 - std::cos(M_PI + M_PI / time_max * time));
+        v_x = std::cos(angle) * v;
+        v_z = -std::sin(angle) * v;
+      }
 
       franka::CartesianVelocities output = {{v_x, 0.0, v_z, 0.0, 0.0, 0.0}};
-      if (time >= 2 * time_max) {
+      if (time >= time_max) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
         return franka::MotionFinished(output);
       }
       return output;
     });
-    robot.control([=, &time](const franka::RobotState&,
-                             franka::Duration period) -> franka::CartesianVelocities {
-      time += period.toSec();
-
-      double cycle = std::floor(pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
-      double v = cycle * v_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / time_max * time));
-      double v_x = std::cos(angle) * v;
-      double v_z = -std::sin(angle) * v;
-
-      franka::CartesianVelocities output = {{v_x, 0.0, v_z, 0.0, 0.0, 0.0}};
-      if (time >= 2 * time_max) {
-        std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return franka::MotionFinished(output);
-      }
-      return output;
-    });
-
-    robot.control([=, &time](const franka::RobotState&,
-                             franka::Duration period) -> franka::CartesianVelocities {
-      time += period.toSec();
-
-      double cycle = std::floor(pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
-      double v = cycle * v_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / time_max * time));
-      double v_x = std::cos(angle) * v;
-      double v_z = -std::sin(angle) * v;
-
-      franka::CartesianVelocities output = {{-v_x, 0.0, -v_z, 0.0, 0.0, 0.0}};
-      if (time >= 2 * time_max) {
-        std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return franka::MotionFinished(output);
-      }
-      return output;
-    });
-
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;

@@ -63,8 +63,6 @@ namespace control_callbacks {
                 global_handler->traj_interpolator_ptr->GetNextStep(
                     global_handler->time, desired_twist_trans_EE_in_base_frame,
                     desired_twist_rot_EE_in_base_frame);
-                std::cout << "Goal: " << goal_state_info->twist_trans_EE_in_base_frame.transpose() << std::endl;
-                std::cout << "Desired: " << desired_twist_trans_EE_in_base_frame.transpose() << std::endl;
 
                 state_publisher->UpdateNewState(robot_state, &model);
 
@@ -79,11 +77,10 @@ namespace control_callbacks {
                                                                 global_handler->min_rot_speed,
                                                                 global_handler->max_rot_speed
                 );
-                std::cout << vel_d_array[0] << ", " << vel_d_array[1] << ", " << vel_d_array[2] << ", " << vel_d_array[3] << ", " << vel_d_array[4] << ", " << vel_d_array[5] << std::endl;
                 std::chrono::high_resolution_clock::time_point t2 =
                     std::chrono::high_resolution_clock::now();
                 auto time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-                global_handler->logger->info("{0} microseconds" , time.count());
+                global_handler->logger->debug("{0} microseconds" , time.count());
                 std::cout << vel_d_array[0] << std::endl;
                 return vel_d_array;
             };

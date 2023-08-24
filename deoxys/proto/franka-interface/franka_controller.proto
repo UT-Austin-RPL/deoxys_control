@@ -153,7 +153,8 @@ message FrankaControlMessage {
     SMOOTH_JOINT_POSITION = 4;
     MIN_JERK_JOINT_POSITION = 5;
     LINEAR_JOINT_POSITION = 6;
-    NULL_VELOCITY = 7;
+    COSINE_CARTESIAN_VELOCITY = 7;
+    LINEAR_CARTESIAN_VELOCITY = 8;
   }
   TrajInterpolatorType traj_interpolator_type = 3;
   double traj_interpolator_time_fraction = 4;

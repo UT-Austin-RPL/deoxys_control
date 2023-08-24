@@ -3,11 +3,11 @@
 #include "base_traj_interpolator.h"
 #include <Eigen/Dense>
 #include <cmath>
-#ifndef DEOXYS_FRANKA_INTERFACE_INCLUDE_UTILS_TRAJ_INTERPOLATORS_NULL_VELOCITY_TRAJ_INTERPOLATOR_H_
-#define DEOXYS_FRANKA_INTERFACE_INCLUDE_UTILS_TRAJ_INTERPOLATORS_NULL_VELOCITY_TRAJ_INTERPOLATOR_H_
+#ifndef DEOXYS_FRANKA_INTERFACE_INCLUDE_UTILS_TRAJ_INTERPOLATORS_LINEAR_CARTESIAN_VELOCITY_TRAJ_INTERPOLATOR_H_
+#define DEOXYS_FRANKA_INTERFACE_INCLUDE_UTILS_TRAJ_INTERPOLATORS_LINEAR_CARTESIAN_VELOCITY_TRAJ_INTERPOLATOR_H_
 
 namespace traj_utils {
-class NullVelocityTrajInterpolator : public BaseTrajInterpolator {
+class LinearCartesianVelocityTrajInterpolator : public BaseTrajInterpolator {
 private:
 
   Eigen::Vector3d twist_trans_start_;
@@ -32,11 +32,11 @@ private:
                                   // interval
 
 public:
-  inline NullVelocityTrajInterpolator()
+  inline LinearCartesianVelocityTrajInterpolator()
       : dt_(0.), last_time_(0.), max_time_(1.), start_time_(0.), start_(false),
         first_goal_(true){};
 
-  inline ~NullVelocityTrajInterpolator(){};
+  inline ~LinearCartesianVelocityTrajInterpolator(){};
 
   inline void Reset(const double &time_sec,
                     const Eigen::Vector3d &twist_trans_start,
@@ -45,7 +45,7 @@ public:
                     const Eigen::Vector3d &twist_rot_goal,
                     const int &policy_rate, const int &rate,
                     const double &traj_interpolator_time_fraction) {
-    // Note that twist_*_start will be ignored in null Velocityocity trajectory interpolator
+    // Note that twist_*_start will be ignored in Linear Velocityocity trajectory interpolator
     dt_ = 1. / static_cast<double>(rate);
     last_time_ = time_sec;
 
@@ -62,11 +62,8 @@ public:
       prev_twist_rot_goal_ = twist_rot_start;
       first_goal_ = false;
     } else {
-      // prev_twist_trans_goal_ = twist_trans_goal_;
-      // prev_twist_rot_goal_ = twist_rot_goal_;
-
-      prev_twist_trans_goal_ = twist_trans_start;
-      prev_twist_trans_goal_ = twist_rot_start;
+      prev_twist_trans_goal_ = twist_trans_goal_;
+      prev_twist_rot_goal_ = twist_rot_goal_;
 
       twist_trans_start_ = prev_twist_trans_goal_;
       twist_rot_start_ = prev_twist_rot_goal_;
@@ -74,10 +71,6 @@ public:
     twist_trans_goal_ = twist_trans_goal;
     twist_rot_goal_ = twist_rot_goal;
 
-    std::cout << " ** twist trans goal: " << twist_trans_goal_.transpose() << std::endl;
-    std::cout << " ** twist trans start: " << twist_trans_start_.transpose() << std::endl; 
-
-    // std::cout << twist_trans_goal_.transpose() << std::endl;
   };
 
   inline void GetNextStep(const double &time_sec, Eigen::Vector3d &twist_trans_t, Eigen::Vector3d &twist_rot_t) {
@@ -90,28 +83,17 @@ public:
 
     // Yifeng: This doesn't really anything in this trajectory interpolator. But this implementation logic is kept for consistency and for future use.
     if (last_time_ + dt_ <= time_sec) {
-      double t =
+      double linear_profile =
           std::min(std::max((time_sec - start_time_) / max_time_, 0.), 1.);
-      // double transformed_t = t;  // 30 * std::pow(t, 2) - 60 * std::pow(t, 3) + 30 * std::pow(t, 4);
-      // double transformed_t = 1 - std::cos(M_PI * t / 2);
-      double cosine_profile = 0.5 * (1 - std::cos(M_PI * t));
-      last_time_ = time_sec;
-      
-      // std::cout << " -- twist trans goal: " << twist_trans_goal_.transpose() << std::endl;
-      // std::cout << " -- twist trans start: " << twist_trans_start_.transpose() << std::endl; 
 
-      // std::cout << transformed_t << " : " << twist_trans_goal_ << std::endl;
-      // std::cout << transformed_t << " : " << twist_trans_start_ << std::endl;
-      last_twist_trans_t_ = twist_trans_start_ + cosine_profile * (twist_trans_goal_ - twist_trans_start_);
-      // last_twist_rot_t_ = twist_rot_start_ + cosine_profile * (twist_rot_goal_- twist_rot_start_);
-      last_twist_rot_t_.setZero();
-      
-      // last_twist_trans_t_ = twist_trans_start_;
-      // last_twist_rot_t_ = twist_rot_start_;
+      last_time_ = time_sec;
+
+      last_twist_trans_t_ = twist_trans_start_ + linear_profile * (twist_trans_goal_ - twist_trans_start_);
+      last_twist_rot_t_ = twist_rot_start_ + linear_profile * (twist_rot_goal_- twist_rot_start_);
+
     }
     twist_trans_t = last_twist_trans_t_;
     twist_rot_t = last_twist_rot_t_;
-    // std::cout << "Last twist: " << last_twist_trans_t_.transpose() << std::endl;
 
   };
 };

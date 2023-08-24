@@ -34,7 +34,8 @@
 #include "utils/traj_interpolators/min_jerk_joint_position_traj_interpolator.h"
 #include "utils/traj_interpolators/min_jerk_pose_traj_interpolator.h"
 #include "utils/traj_interpolators/smooth_joint_traj_interpolator.h"
-#include "utils/traj_interpolators/null_velocity_traj_interpolator.h"
+#include "utils/traj_interpolators/cosine_cartesian_velocity_traj_interpolator.h"
+#include "utils/traj_interpolators/linear_cartesian_velocity_traj_interpolator.h"
 
 // State estimators
 #include "utils/state_estimators/exponential_smoothing_estimator.h"
@@ -70,7 +71,8 @@ enum TrajInterpolatorType {
   SMOOTH_JOINT_POSITION,
   MIN_JERK_JOINT_POSITION,
   LINEAR_JOINT_POSITION,
-  NULL_VELOCITY,
+  COSINE_CARTESIAN_VELOCITY,
+  LINEAR_CARTESIAN_VELOCITY,
 };
 
 enum StateEstimatorType {
@@ -134,8 +136,10 @@ bool GetTrajInterpolatorType(const FrankaControlMessage &franka_control_msg,
   } else if (franka_control_msg.traj_interpolator_type() ==
              FrankaControlMessage_TrajInterpolatorType_LINEAR_JOINT_POSITION) {
     traj_interpolator_type = TrajInterpolatorType::LINEAR_JOINT_POSITION;
-  } else if (franka_control_msg.traj_interpolator_type() == FrankaControlMessage_TrajInterpolatorType_NULL_VELOCITY) {
-    traj_interpolator_type = TrajInterpolatorType::NULL_VELOCITY;
+  } else if (franka_control_msg.traj_interpolator_type() == FrankaControlMessage_TrajInterpolatorType_COSINE_CARTESIAN_VELOCITY) {
+    traj_interpolator_type = TrajInterpolatorType::COSINE_CARTESIAN_VELOCITY;
+  } else if (franka_control_msg.traj_interpolator_type() == FrankaControlMessage_TrajInterpolatorType_LINEAR_CARTESIAN_VELOCITY) {
+    traj_interpolator_type = TrajInterpolatorType::LINEAR_CARTESIAN_VELOCITY;
   }
   else {
     traj_interpolator_type = TrajInterpolatorType::NO_INTERPOLATION;
@@ -470,12 +474,17 @@ int main(int argc, char **argv) {
                   traj_utils::LinearJointPositionTrajInterpolator>();
               global_handler->logger->info(
                   "Initialize Linear Joint Position Trajectory Interpolator");
-            } else if (control_command.traj_interpolator_type == TrajInterpolatorType::NULL_VELOCITY) {
+            } else if (control_command.traj_interpolator_type == TrajInterpolatorType::COSINE_CARTESIAN_VELOCITY) {
               global_handler->traj_interpolator_ptr = std::make_shared<
-                  traj_utils::NullVelocityTrajInterpolator>();
+                  traj_utils::CosineCartesianVelocityTrajInterpolator>();
               global_handler->logger->info(
-                  "No Trajectory Interpolator Used For Velocity Control");
-            } else {
+                  "Initialize Cosine Cartesian Velocity Trajectory Interpolator");
+            } else if (control_command.traj_interpolator_type == TrajInterpolatorType::LINEAR_CARTESIAN_VELOCITY) {
+              global_handler->traj_interpolator_ptr = std::make_shared<
+                  traj_utils::LinearCartesianVelocityTrajInterpolator>();
+              global_handler->logger->info(
+                  "Initialize Linear Cartesian Velocity Trajectory Interpolator");
+            }else {
               global_handler->logger->error("No interpolator is specified");
             }
 
@@ -505,7 +514,8 @@ int main(int argc, char **argv) {
                 goal_state_info->joint_positions, policy_rate, traj_rate,
                 global_handler->traj_interpolator_time_fraction);
             break;
-          case TrajInterpolatorType::NULL_VELOCITY:
+          case TrajInterpolatorType::COSINE_CARTESIAN_VELOCITY:
+          case TrajInterpolatorType::LINEAR_CARTESIAN_VELOCITY:
             global_handler->traj_interpolator_ptr->Reset(
                 global_handler->time, current_state_info->twist_trans_EE_in_base_frame,
                 current_state_info->twist_rot_EE_in_base_frame,
