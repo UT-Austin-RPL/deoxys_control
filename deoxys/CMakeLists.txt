@@ -121,8 +121,10 @@ if (BUILD_FRANKA)
   target_link_libraries(zmq-client zmqpp deoxys::shared_protobuf)
 
   # test cartesian velocity controller
-  add_executable(cartesian-velocity franka-interface/src/test/test_cartesian_velocity_control.cpp)
-  target_link_libraries(cartesian-velocity deoxys::shared_protobuf ${FRANKA_LIBS} deoxys::shared_utils)
+  add_executable(cartesian-velocity-1 franka-interface/src/test/test_cartesian_velocity_control_1.cpp)
+  target_link_libraries(cartesian-velocity-1 deoxys::shared_protobuf ${FRANKA_LIBS} deoxys::shared_utils)
+  add_executable(cartesian-velocity-2 franka-interface/src/test/test_cartesian_velocity_control_2.cpp)
+  target_link_libraries(cartesian-velocity-2 deoxys::shared_protobuf ${FRANKA_LIBS} deoxys::shared_utils)
 
 
   install(TARGETS
@@ -132,7 +134,8 @@ if (BUILD_FRANKA)
     robot-state-pub
     yaml-example
     spdlog-example
-    cartesian-velocity
+    cartesian-velocity-1
+    cartesian-velocity-2
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     )
