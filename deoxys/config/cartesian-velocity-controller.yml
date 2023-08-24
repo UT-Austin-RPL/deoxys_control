@@ -3,7 +3,7 @@ controller_type: CARTESIAN_VELOCITY
 is_delta: false
 
 traj_interpolator_cfg:
-  traj_interpolator_type: NULL_VELOCITY
+  traj_interpolator_type: COSINE_CARTESIAN_VELOCITY
   time_fraction: 0.3
 
 action_scale:

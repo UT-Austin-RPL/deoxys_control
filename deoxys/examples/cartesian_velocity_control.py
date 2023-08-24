@@ -1,5 +1,4 @@
 # This is an exmaple to run cartesian velocity control with Deoxys. This controller is useful if your research is mainly about TransporterNet like tasks.
-
 import argparse
 import pickle
 import threading
@@ -49,9 +48,11 @@ def main():
 
     reset_joints_to(robot_interface, reset_joint_positions)
 
+    time.sleep(1)
+
     # Cartesian velocity control
 
-    controller_type = "CARTEISAN_VELOCITY"
+    controller_type = "CARTESIAN_VELOCITY"
     controller_cfg = get_default_controller_config(controller_type=controller_type)
 
 
@@ -60,18 +61,16 @@ def main():
 
     v_max = 0.1
     angle = np.pi / 4.0
-    for time_step in time_sequence:
-        cycle = np.floor(np.power(-1.0, (time_step - np.fmod(time_step, time_max)) / time_max))
-        v = cycle * v_max / 2.0 * (1.0 - np.cos(2.0 * np.pi / time_max * time_step))
-        vx = np.cos(angle) * v
-        vz = -np.sin(angle) * v
-        print(vx, vz)
-        # action = [vx, 0.0, vz, 0.0, 0.0, 0.0] + [-1.0]
-        # robot_interface.control(
-        #     controller_type=controller_type,
-        #     action=action,
-        #     controller_cfg=controller_cfg,
-        # )
+    for i in range(100):
+        vx = 0.05 * (1 - np.abs(np.cos(np.pi * i / 100)))
+        action = [vx, 0.0, vx, vx, vx * 2, vx * 4] + [-1]
+        print(action[0])
+        robot_interface.control(
+            controller_type=controller_type,
+            action=action,
+            controller_cfg=controller_cfg,
+        )
+
 
 if __name__ == "__main__":
     main()
