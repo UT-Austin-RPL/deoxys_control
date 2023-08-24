@@ -224,8 +224,8 @@ int main(int argc, char **argv) {
   try {
 
     franka::Robot robot(robot_ip);
-    setDefaultBehavior(robot);
     robot.automaticErrorRecovery();
+    setDefaultBehavior(robot);
     franka::Model model = robot.loadModel();
 
     // TODO(Yifeng): Read this config from yaml file
