@@ -69,8 +69,6 @@ namespace control_callbacks {
                 vel_d_array = global_handler->controller_ptr->Step(
                     robot_state, desired_twist_trans_EE_in_base_frame,
                     desired_twist_rot_EE_in_base_frame);
-                std::cout << vel_d_array[0] << std::endl;
-                // (TODO): Maybe we need to limit the velocity commands within some safety threshold (Function defined in control_utils::CartesianVelocitiesSafetyGuardFn)
                 control_utils::CartesianVelocitySafetyGuardFn(vel_d_array,
                                                                 global_handler->min_trans_speed,
                                                                 global_handler->max_trans_speed,
@@ -81,7 +79,6 @@ namespace control_callbacks {
                     std::chrono::high_resolution_clock::now();
                 auto time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
                 global_handler->logger->debug("{0} microseconds" , time.count());
-                std::cout << vel_d_array[0] << std::endl;
                 return vel_d_array;
             };
         }

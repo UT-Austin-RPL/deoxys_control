@@ -84,7 +84,6 @@ std::array<double, 6> CartesianVelocityController::Step(const franka::RobotState
 
   target_v << desired_twist_trans_EE_in_base_frame, desired_twist_rot_EE_in_base_frame;
   
-  std::cout << "Targe V" << target_v << std::endl;
   // TODO: Scale the target command with speed_factor
 
   std::array<double, 6> vel_d_array{};
