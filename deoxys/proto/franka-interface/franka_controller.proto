@@ -107,6 +107,13 @@ message FrankaJointImpedanceControllerMessage {
   repeated double kd = 3;
 }
 
+message FrankaCartesianVelocityControllerMessage {
+  Goal goal = 1;
+  double kp_gains = 2;
+  double kd_gains = 3;
+  double speed_factor=4;
+}
+
 // TODO(Yifeng) Placeholder for now
 
 message FrankaJointVelocityControllerMessage {
@@ -135,6 +142,7 @@ message FrankaControlMessage {
     JOINT_VELOCITY = 5;
     TORQUE = 6;
     OSC_YAW = 7;
+    CARTESIAN_VELOCITY = 8;
   }
   ControllerType controller_type = 2;
   enum TrajInterpolatorType {
@@ -145,6 +153,8 @@ message FrankaControlMessage {
     SMOOTH_JOINT_POSITION = 4;
     MIN_JERK_JOINT_POSITION = 5;
     LINEAR_JOINT_POSITION = 6;
+    COSINE_CARTESIAN_VELOCITY = 7;
+    LINEAR_CARTESIAN_VELOCITY = 8;
   }
   TrajInterpolatorType traj_interpolator_type = 3;
   double traj_interpolator_time_fraction = 4;

@@ -17,12 +17,12 @@ protected:
   Eigen::Array<double, 7, 1> joint_max_;
   Eigen::Array<double, 7, 1> joint_min_;
 
-  Eigen::Matrix<double, 7, 1> smooth_current_q_;
-  Eigen::Matrix<double, 7, 1> smooth_prev_q_;
-  Eigen::Matrix<double, 7, 1> smooth_current_dq_;
+  // Eigen::Matrix<double, 7, 1> smooth_current_q_;
+  // Eigen::Matrix<double, 7, 1> smooth_prev_q_;
+  // Eigen::Matrix<double, 7, 1> smooth_current_dq_;
 
-  double alpha_q_;
-  double alpha_dq_;
+  // double alpha_q_;
+  // double alpha_dq_;
 
   bool first_state_ = true;
 
@@ -34,8 +34,6 @@ public:
 
   bool ParseMessage(const FrankaControlMessage &msg);
 
-  // void ComputeGoal(const Eigen::Vector3d&, const Eigen::Quaterniond&,
-  // Eigen::Vector3d&, Eigen::Quaterniond&);
   void ComputeGoal(const std::shared_ptr<StateInfo> &state_info,
                    std::shared_ptr<StateInfo> &goal_info);
 

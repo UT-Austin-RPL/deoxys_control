@@ -76,12 +76,15 @@ if (BUILD_FRANKA)
 
   set(FRANKA_LIBS Eigen3::Eigen3 Franka::Franka Threads::Threads zmqpp yaml-cpp spdlog)
 
+  # Add your new controller files here
   set (CONTROLLERS
     franka-interface/src/controllers/osc_impedance.cpp
     franka-interface/src/controllers/osc_position_impedance.cpp
     franka-interface/src/controllers/osc_yaw_impedance.cpp
     franka-interface/src/controllers/joint_position.cpp
-    franka-interface/src/controllers/joint_impedance.cpp)
+    franka-interface/src/controllers/joint_impedance.cpp
+    franka-interface/src/controllers/cartesian_velocity.cpp
+    )
   
   add_library(shared_utils
     franka-interface/src/utils/common_utils.cpp
@@ -117,6 +120,11 @@ if (BUILD_FRANKA)
   add_executable(zmq-client franka-interface/src/test/test_zmq.cpp)
   target_link_libraries(zmq-client zmqpp deoxys::shared_protobuf)
 
+  # test cartesian velocity controller
+  add_executable(cartesian-velocity franka-interface/src/test/test_cartesian_velocity_control.cpp)
+  target_link_libraries(cartesian-velocity deoxys::shared_protobuf ${FRANKA_LIBS} deoxys::shared_utils)
+
+
   install(TARGETS
     franka-interface
     gripper-interface
@@ -124,6 +132,7 @@ if (BUILD_FRANKA)
     robot-state-pub
     yaml-example
     spdlog-example
+    cartesian-velocity
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     )

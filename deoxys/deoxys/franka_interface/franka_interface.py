@@ -28,6 +28,16 @@ def action_to_osc_pose_goal(action, is_delta=True) -> franka_controller_pb2.Goal
     goal.az = action[5]
     return goal
 
+def action_to_cartesian_velocity(action, is_delta=True) -> franka_controller_pb2.Goal:
+    goal = franka_controller_pb2.Goal()
+    goal.is_delta = is_delta
+    goal.x = action[0]
+    goal.y = action[1]
+    goal.z = action[2]
+    goal.ax = action[3]
+    goal.ay = action[4]
+    goal.az = action[5]
+    return goal
 
 def action_to_joint_pos_goal(action, is_delta=False) -> franka_controller_pb2.JointGoal:
     goal = franka_controller_pb2.JointGoal()
@@ -49,6 +59,8 @@ TRAJ_INTERPOLATOR_MAPPING = {
     "LINEAR_JOINT_POSITION": franka_controller_pb2.FrankaControlMessage.TrajInterpolatorType.LINEAR_JOINT_POSITION,
     "MIN_JERK_POSE": franka_controller_pb2.FrankaControlMessage.TrajInterpolatorType.MIN_JERK_POSE,
     "MIN_JERK_JOINT_POSITION": franka_controller_pb2.FrankaControlMessage.TrajInterpolatorType.MIN_JERK_JOINT_POSITION,
+    "COSINE_CARTESIAN_VELOCITY": franka_controller_pb2.FrankaControlMessage.TrajInterpolatorType.COSINE_CARTESIAN_VELOCITY,
+    "LINEAR_CARTESIAN_VELOCITY": franka_controller_pb2.FrankaControlMessage.TrajInterpolatorType.LINEAR_CARTESIAN_VELOCITY
 }
 
 
@@ -289,6 +301,7 @@ class FrankaInterface:
 
             msg_str = control_msg.SerializeToString()
             self._publisher.send(msg_str)
+
         elif controller_type == "OSC_POSITION":
 
             assert controller_cfg is not None
@@ -420,6 +433,39 @@ class FrankaInterface:
                 controller_cfg.traj_interpolator_cfg["time_fraction"]
             )
             control_msg.control_msg.Pack(joint_impedance_msg)
+            control_msg.timeout = 0.2
+            control_msg.termination = termination
+
+            control_msg.state_estimator_msg.CopyFrom(state_estimator_msg)
+
+            msg_str = control_msg.SerializeToString()
+            self._publisher.send(msg_str)
+
+        elif controller_type == "CARTESIAN_VELOCITY":
+            assert controller_cfg is not None
+
+            cartesian_velocity_msg = franka_controller_pb2.FrankaCartesianVelocityControllerMessage()
+
+            action[0:3] *= controller_cfg.action_scale.translation
+            action[3 : self.last_gripper_dim] *= controller_cfg.action_scale.rotation
+
+            logger.debug(f"OSC action: {np.round(action, 3)}")
+
+            self._history_actions.append(action)
+            goal = action_to_cartesian_velocity(action, is_delta=controller_cfg.is_delta)
+            cartesian_velocity_msg.goal.CopyFrom(goal)
+
+            control_msg = franka_controller_pb2.FrankaControlMessage()
+            control_msg.controller_type = (
+                franka_controller_pb2.FrankaControlMessage.ControllerType.CARTESIAN_VELOCITY
+            )
+            control_msg.traj_interpolator_type = TRAJ_INTERPOLATOR_MAPPING[
+                controller_cfg.traj_interpolator_cfg.traj_interpolator_type
+            ]
+            control_msg.traj_interpolator_time_fraction = (
+                controller_cfg.traj_interpolator_cfg["time_fraction"]
+            )
+            control_msg.control_msg.Pack(cartesian_velocity_msg)
             control_msg.timeout = 0.2
             control_msg.termination = termination
 
