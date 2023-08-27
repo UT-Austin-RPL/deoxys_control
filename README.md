@@ -2,6 +2,18 @@
 <img src="./deoxys_github_logo.png">
 </p>
 
+<p align="center">
+<a href="https://github.com/UT-Austin-RPL/deoxys_control/actions">
+<img alt="Tests Passing" src="https://github.com/anuraghazra/github-readme-stats/workflows/Test/badge.svg" />
+</a>
+<a href="https://github.com/UT-Austin-RPL/deoxys_control/graphs/contributors">
+<img alt="GitHub Contributors" src="https://img.shields.io/github/contributors/UT-Austin-RPL/deoxys_control" />
+</a>
+<a href="https://github.com/UT-Austin-RPL/deoxys_control/issues">
+<img alt="Issues" src="https://img.shields.io/github/issues/UT-Austin-RPL/deoxys_control?color=0088ff" />
+</a>
+
+
 [**[Documentation]**](https://zhuyifengzju.github.io/deoxys_docs/html/index.html) &ensp; 
 
 Deoxys is a modular, real-time controller library for Franka Emika Panda arm, aiming to facilitate a wide range of robot learning research. Deoxys comes with a user-friendly python interface and real-time controller implementation in C++. If you are a [robosuite](https://github.com/ARISE-Initiative/robosuite) user, Deoxys APIs provide seamless transfer 
