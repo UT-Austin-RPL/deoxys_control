@@ -1,10 +1,14 @@
 """
 Numba utils.
 """
-import numba
+try:
+    import numba
 
-ENABLE_NUMBA = True
-CACHE_NUMBA = True
+    ENABLE_NUMBA = True
+    CACHE_NUMBA = True
+except:
+    ENABLE_NUMBA = False
+    CACHE_NUMBA = False
 
 
 def jit_decorator(func):
