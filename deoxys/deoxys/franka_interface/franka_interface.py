@@ -84,6 +84,7 @@ class FrankaInterface:
         control_timeout: float = 1.0,
         has_gripper: bool = True,
         use_visualizer: bool = False,
+        automatic_gripper_reset: bool=True,
     ):
         general_cfg = YamlConfig(general_cfg_file).as_easydict()
         self._name = general_cfg.PC.NAME
@@ -156,6 +157,9 @@ class FrankaInterface:
         self.last_gripper_command_counter = 0
         self._history_actions = []
 
+        # automatically reset gripper by default
+        self.automatic_gripper_reset = automatic_gripper_reset
+
     def get_state(self, no_block: bool = False):
         """_summary_
 
@@ -190,14 +194,15 @@ class FrankaInterface:
 
     def preprocess(self):
 
-        gripper_control_msg = franka_controller_pb2.FrankaGripperControlMessage()
-        move_msg = franka_controller_pb2.FrankaGripperMoveMessage()
-        move_msg.width = 0.08
-        move_msg.speed = 0.1
-        gripper_control_msg.control_msg.Pack(move_msg)
+        if self.automatic_gripper_reset:
+            gripper_control_msg = franka_controller_pb2.FrankaGripperControlMessage()
+            move_msg = franka_controller_pb2.FrankaGripperMoveMessage()
+            move_msg.width = 0.08
+            move_msg.speed = 0.1
+            gripper_control_msg.control_msg.Pack(move_msg)
 
-        logger.debug("Moving Command")
-        self._gripper_publisher.send(gripper_control_msg.SerializeToString())
+            logger.debug("Moving Command")
+            self._gripper_publisher.send(gripper_control_msg.SerializeToString())
 
         for _ in range(20):
             dummy_msg = franka_controller_pb2.FrankaDummyControllerMessage()
@@ -617,6 +622,12 @@ class FrankaInterface:
         if self.state_buffer_size == 0:
             return None
         return self._state_buffer[-1]
+
+    @property
+    def last_pose(self):
+        if self.state_buffer_size == 0:
+            return None
+        return np.array(self._state_buffer[-1].O_T_EE).reshape(4, 4).transpose()
 
     @property
     def state_buffer_size(self) -> int:

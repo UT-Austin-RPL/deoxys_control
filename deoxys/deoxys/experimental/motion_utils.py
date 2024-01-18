@@ -17,6 +17,7 @@ def reset_joints_to(
     start_joint_pos: Union[list, np.ndarray],
     controller_cfg: dict = None,
     timeout=7,
+    gripper_open=False,
 ):
     assert type(start_joint_pos) is list or type(start_joint_pos) is np.ndarray
     if controller_cfg is None:
@@ -27,10 +28,15 @@ def reset_joints_to(
             + controller_cfg["controller_type"]
         )
         controller_cfg = verify_controller_config(controller_cfg)
-    if type(start_joint_pos) is list:
-        action = start_joint_pos + [-1.0]
+
+    if gripper_open:
+        gripper_action = -1
     else:
-        action = start_joint_pos.tolist() + [-1.0]
+        gripper_action = 1
+    if type(start_joint_pos) is list:
+        action = start_joint_pos + [gripper_action]
+    else:
+        action = start_joint_pos.tolist() + [gripper_action]
     start_time = time.time()
     while True:
         if (
