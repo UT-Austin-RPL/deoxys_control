@@ -14,13 +14,34 @@ from deoxys.utils.ik_utils import IKWrapper
 
 logger = get_deoxys_example_logger()
 
+def execute_ik_result(robot_interface, controller_type, controller_cfg, joint_traj):
+    valid_input = False
+    while not valid_input:
+        try:
+            execute = input(f"Excute or not? (enter 0 - No or 1 - Yes)")
+            execute = bool(int(execute))
+            valid_input = True
+        except ValueError:
+            print("Please input 1 or 0!")
+            continue
+
+    if execute:
+        for joint in joint_traj:
+            # This example assumes the gripper is open
+            action = joint.tolist() + [-1.0]
+            robot_interface.control(
+                controller_type=controller_type,
+                action=action,
+                controller_cfg=controller_cfg,
+            )
+    robot_interface.close()
+    return bool(execute)
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--motion-file", type=str)
     robot_config_parse_args(parser)
     return parser.parse_args()
-
 
 def main():
 
@@ -42,35 +63,28 @@ def main():
 
     ik_wrapper = IKWrapper()
 
-    logger.info("Starting IK ...")
-    target_world_position = np.array([0.5, 0.0, 0.3])
+    logger.info("Starting IK of goint to absolute position ...")
+    target_world_position = np.array([0.4, 0.2, 0.05])
     # inverse kinematics will compute the trajectory based on the current joint configuration
-    joint_traj, debug_info = ik_wrapper.ik_trajectory_to_target_position(target_world_position, last_q, last_q.tolist())
+    joint_traj, debug_info = ik_wrapper.ik_trajectory_to_target_position(target_world_position, last_q.tolist(), num_points=100)
 
     logger.info("Visualizing IK results ...")
     joint_traj = ik_wrapper.interpolate_dense_traj(joint_traj)
     ik_wrapper.simulate_joint_sequence(joint_traj)
 
-    valid_input = False
-    while not valid_input:
-        try:
-            execute = input(f"Excute or not? (enter 0 - No or 1 - Yes)")
-            execute = bool(int(execute))
-            valid_input = True
-        except ValueError:
-            print("Please input 1 or 0!")
-            continue
+    execute_ik_result(robot_interface, controller_type, controller_cfg, joint_traj)
 
-    if execute:
-        for joint in joint_traj:
-            # This example assumes the gripper is open
-            action = joint.tolist() + [-1.0]
-            robot_interface.control(
-                controller_type=controller_type,
-                action=action,
-                controller_cfg=controller_cfg,
-            )         
-    robot_interface.close()
+    logger.info("Starting IK of moving delta position ...")
+    delta_position = np.array([0.15, 0., 0.0])
+    # inverse kinematics will compute the trajectory based on the current joint configuration
+    joint_traj, debug_info = ik_wrapper.ik_trajectory_delta_position(delta_position, last_q.tolist(), num_points=100)
 
+    logger.info("Visualizing IK results ...")
+    joint_traj = ik_wrapper.interpolate_dense_traj(joint_traj)
+    ik_wrapper.simulate_joint_sequence(joint_traj)
+
+    execute_ik_result(robot_interface, controller_type, controller_cfg, joint_traj)
+    
+    
 if __name__ == "__main__":
     main()

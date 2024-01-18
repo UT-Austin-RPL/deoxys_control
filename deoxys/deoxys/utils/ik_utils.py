@@ -63,6 +63,20 @@ class IKWrapper:
             "quat_seq": quat_seq
         }
         return predicted_joints_seq, debug_info
+
+    def ik_trajectory_delta_position(self, delta_pos, start_joint_positions, num_points=100, verbose=True):
+        assert(len(start_joint_positions) == 7), "start_joint_positions should be a list of 7 elements"
+        predicted_joints_seq = [np.array(start_joint_positions)]
+
+        self.data.qpos[:] = start_joint_positions + [0.04] * 2
+        gripper_site_id = self.model.site("grip_site").id
+        jac = np.zeros((6, self.model.nv))
+
+        mujoco.mj_step(self.model, self.data, 1)
+        current_pos = np.copy(self.data.site(gripper_site_id).xpos)
+        current_mat = np.copy(self.data.site(gripper_site_id).xmat).reshape(3, 3)
+        target_pos = current_pos + delta_pos
+        return self.ik_trajectory_to_target_position(target_pos, start_joint_positions, num_points, verbose)
     
 
     def ik_trajectory_to_target_position(self, target_pos, start_joint_positions, num_points=100, verbose=True):
