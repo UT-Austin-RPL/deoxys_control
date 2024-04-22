@@ -30,7 +30,8 @@ setup(
                 'deoxys.get_controller_list=deoxys.scripts.get_deoxys_info:default_controller_list',
                 'deoxys.get_controller_info=deoxys.scripts.get_deoxys_info:default_all_controller_info',
                 'deoxys.reset_joints=deoxys.scripts.reset_robot_joints:main',
-                'deoxys.velocity_example=examples.cartesian_velocity_control:main'
+                'deoxys.print_robot_state=deoxys.scripts.print_robot_state:main',
+                'deoxys.velocity_example=examples.cartesian_velocity_control:main',
         ]
     },
 )
