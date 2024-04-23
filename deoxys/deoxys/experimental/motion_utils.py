@@ -92,6 +92,7 @@ def follow_joint_traj(
     joint_traj: list,
     num_addition_steps=30,
     controller_cfg: dict = None,
+    gripper_close=True,
 ):
     """This is a simple function to follow a given trajectory in joint space.
 
@@ -132,7 +133,10 @@ def follow_joint_traj(
         else:
             action = target_joint_pos
         if len(action) == 7:
-            action = action + [-1.0]
+            if gripper_close:
+                action = action + [1.0]
+            else:
+                action = action + [-1.0]
         current_joint_pos = np.array(robot_interface.last_q)
         robot_interface.control(
             controller_type="JOINT_IMPEDANCE",

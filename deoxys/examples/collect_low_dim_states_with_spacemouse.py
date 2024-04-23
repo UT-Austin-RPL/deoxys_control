@@ -97,7 +97,7 @@ def main():
 
     time.sleep(2)
 
-    while i < 2000:
+    while i < 4000:
         logger.info(i)
         i += 1
         start_time = time.time_ns()
