@@ -35,6 +35,9 @@ git clone https://github.com/jbeder/yaml-cpp.git
 
 # download spdlog package
 git clone https://github.com/gabime/spdlog.git
+cd spdlog
+git checkout ac55e60488032b9acde8940a5de099541c4515da
+cd ..
 
 # download protobuf
 git clone --recursive https://github.com/protocolbuffers/protobuf.git

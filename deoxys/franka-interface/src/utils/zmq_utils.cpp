@@ -19,6 +19,7 @@ ZMQSubscriber::ZMQSubscriber(std::string ip, std::string port,
                              std::string filter)
     : subscriber_socket_(context_, zmqpp::socket_type::subscribe) {
   sub_host_ = "tcp://" + ip + ":" + port;
+  subscriber_socket_.set(zmqpp::socket_option::conflate, 1);
   subscriber_socket_.subscribe(filter);
   subscriber_socket_.connect(sub_host_);
 };
