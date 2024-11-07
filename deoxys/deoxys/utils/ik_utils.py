@@ -18,7 +18,7 @@ class IKWrapper:
         assert(len(start_joint_positions) == 7), "start_joint_positions should be a list of 7 elements"
         predicted_joints_seq = [np.array(start_joint_positions)]
 
-        self.data.qpos[:] = start_joint_positions + [0.04] * 2
+        self.data.qpos[:] = np.concatenate((start_joint_positions, [0.04] * 2))
         gripper_site_id = self.model.site("grip_site").id
         jac = np.zeros((6, self.model.nv))
 
@@ -68,7 +68,7 @@ class IKWrapper:
         assert(len(start_joint_positions) == 7), "start_joint_positions should be a list of 7 elements"
         predicted_joints_seq = [np.array(start_joint_positions)]
 
-        self.data.qpos[:] = start_joint_positions + [0.04] * 2
+        self.data.qpos[:] = np.concatenate((start_joint_positions, [0.04] * 2))
         gripper_site_id = self.model.site("grip_site").id
         jac = np.zeros((6, self.model.nv))
 
@@ -84,7 +84,7 @@ class IKWrapper:
         assert(len(start_joint_positions) == 7), "start_joint_positions should be a list of 7 elements"
         predicted_joints_seq = [np.array(start_joint_positions)]
 
-        self.data.qpos[:] = start_joint_positions + [0.04] * 2
+        self.data.qpos[:] = np.concatenate((start_joint_positions, [0.04] * 2))
         gripper_site_id = self.model.site("grip_site").id
         jac = np.zeros((6, self.model.nv))
 
@@ -124,7 +124,7 @@ class IKWrapper:
                     mujoco.mjv_defaultFreeCamera(self.model, viewer.cam)
                     while viewer.is_running():
                         for joint_conf in joint_sequence:
-                            self.data.qpos[:] = joint_conf.tolist() + [0.04] * 2
+                            self.data.qpos[:] = np.concatenate((joint_conf, [0.04] * 2))
                             mujoco.mj_step(self.model, self.data, 1)
                             viewer.sync()
                             time.sleep(1/fps)
@@ -139,7 +139,7 @@ class IKWrapper:
                             break   
         else:
             for joint_conf in joint_sequence:
-                self.data.qpos[:] = joint_conf.tolist() + [0.04] * 2
+                self.data.qpos[:] = np.concatenate((joint_conf, [0.04] * 2))
                 mujoco.mj_step(self.model, self.data, 1)
                 gripper_site_id = self.model.site("grip_site").id
                 # mujoco.mj_fwdPosition(model, data)
@@ -166,7 +166,7 @@ class IKWrapper:
         site_xquat = np.empty(4, dtype=dtype)
         neg_site_xquat = np.empty(4, dtype=dtype)
         error_rot_quat = np.empty(4, dtype=dtype)
-        data.qpos[:] = reset_joint_positions + [0.04] * 2
+        data.qpos[:] = np.concatenate((reset_joint_positions ,[0.04] * 2))
 
         mujoco.mj_fwdPosition(model, data)
         gripper_site_id = model.site("grip_site").id
