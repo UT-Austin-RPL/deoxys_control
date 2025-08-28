@@ -56,7 +56,7 @@ if (BUILD_FRANKA)
   add_proto_cc_library(shared_protobuf
     NAMESPACE ${PROTO_NAMESPACE}
     PROTO_FILES ${FRANKA_PROTO_FILES}
-    PROTO_LIB protobuf)
+    PROTO_LIB protobuf::libprotobuf)
   set(BUILD_TESTS OFF CACHE BOOL "Turn off libfranka tests")
   set(BUILD_EXAMPLES OFF CACHE BOOL "Turn off libfranka examples")
   find_package(Eigen3 REQUIRED)
@@ -141,7 +141,7 @@ endif(BUILD_FRANKA)
 if (BUILD_DEOXYS)
   add_proto_py_library(py_protobuf
     PROTO_FILES ${PROTO_FILES}
-    PROTO_LIB protobuf)
+    PROTO_LIB protobuf::libprotobuf)
   install(DIRECTORY "${PY_PROTOBUF_OUTPUT_DIR}/"
     DESTINATION "${PYTHON_MODULE_OUTPUT_DIRECTORY}/deoxys/proto"
     )

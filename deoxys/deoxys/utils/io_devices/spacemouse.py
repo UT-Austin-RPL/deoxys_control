@@ -19,6 +19,8 @@ For Linux support, you can find open-source Linux drivers and SDKs online.
 import threading
 import time
 from collections import namedtuple
+from time import sleep
+from termcolor import cprint
 
 import numpy as np
 
@@ -112,6 +114,8 @@ class SpaceMouse:
     def __init__(
         self, vendor_id=9583, product_id=50735, pos_sensitivity=1.0, rot_sensitivity=1.0
     ):
+
+        self.product_id = product_id
 
         print("Opening SpaceMouse device")
         self.device = hid.device()
@@ -217,44 +221,96 @@ class SpaceMouse:
 
         while True:
             d = self.device.read(13)
+            # try:
+            #     d = self.device.read(13)
+            # except OSError as e:
+            #     cprint(f"Error reading from SpaceMouse: {e}", "red")
+            #     sleep(0.0001)
+            #     continue
+
             if d is not None and self._enabled:
 
-                if d[0] == 1:  ## readings from 6-DoF sensor
-                    self.y = convert(d[1], d[2])
-                    self.x = convert(d[3], d[4])
-                    self.z = convert(d[5], d[6]) * -1.0
 
-                    self.roll = convert(d[7], d[8])
-                    self.pitch = convert(d[9], d[10])
-                    self.yaw = convert(d[11], d[12])
+                if self.product_id == 50741:
+                    ## logic for older spacemouse model
 
-                    self._control = [
-                        self.x,
-                        self.y,
-                        self.z,
-                        self.roll,
-                        self.pitch,
-                        self.yaw,
-                    ]
+                    if d[0] == 1:  ## readings from 6-DoF sensor
+                        self.y = convert(d[1], d[2])
+                        self.x = convert(d[3], d[4])
+                        self.z = convert(d[5], d[6]) * -1.0
 
-                elif d[0] == 3:  ## readings from the side buttons
+                    elif d[0] == 2:
 
-                    # press left button
-                    if d[1] == 1:
-                        t_click = time.time()
-                        elapsed_time = t_click - t_last_click
-                        t_last_click = t_click
-                        self.single_click_and_hold = True
+                        self.roll = convert(d[1], d[2])
+                        self.pitch = convert(d[3], d[4])
+                        self.yaw = convert(d[5], d[6])
 
-                    # release left button
-                    if d[1] == 0:
-                        self.single_click_and_hold = False
+                        self._control = [
+                            self.x,
+                            self.y,
+                            self.z,
+                            self.roll,
+                            self.pitch,
+                            self.yaw,
+                        ]
+                    elif d[0] == 3:  ## readings from the side buttons
 
-                    # right button is for reset
-                    if d[1] == 2:
-                        self._reset_state = 1
-                        self._enabled = False
-                        self._reset_internal_state()
+                        # press left button
+                        if d[1] == 1:
+                            t_click = time.time()
+                            elapsed_time = t_click - t_last_click
+                            t_last_click = t_click
+                            self.single_click_and_hold = True
+
+                        # release left button
+                        if d[1] == 0:
+                            self.single_click_and_hold = False
+
+                        # right button is for reset
+                        if d[1] == 2:
+                            self._reset_state = 1
+                            self._enabled = False
+                            self._reset_internal_state()
+
+                else:
+                    ## default logic for all other spacemouse models
+
+                    if d[0] == 1:  ## readings from 6-DoF sensor
+                        self.y = convert(d[1], d[2])
+                        self.x = convert(d[3], d[4])
+                        self.z = convert(d[5], d[6]) * -1.0
+
+                        self.roll = convert(d[7], d[8])
+                        self.pitch = convert(d[9], d[10])
+                        self.yaw = convert(d[11], d[12])
+
+                        self._control = [
+                            self.x,
+                            self.y,
+                            self.z,
+                            self.roll,
+                            self.pitch,
+                            self.yaw,
+                        ]
+
+                    elif d[0] == 3:  ## readings from the side buttons
+
+                        # press left button
+                        if d[1] == 1:
+                            t_click = time.time()
+                            elapsed_time = t_click - t_last_click
+                            t_last_click = t_click
+                            self.single_click_and_hold = True
+
+                        # release left button
+                        if d[1] == 0:
+                            self.single_click_and_hold = False
+
+                        # right button is for reset
+                        if d[1] == 2:
+                            self._reset_state = 1
+                            self._enabled = False
+                            self._reset_internal_state()
 
     @property
     def control(self):

@@ -16,6 +16,8 @@ from deoxys.utils.yaml_config import YamlConfig
 
 logger = logging.getLogger(__name__)
 
+print(f"{franka_robot_state_pb2.FrankaRobotStateMessage=}")
+print()
 
 def action_to_osc_pose_goal(action, is_delta=True) -> franka_controller_pb2.Goal:
     goal = franka_controller_pb2.Goal()
@@ -538,6 +540,29 @@ class FrankaInterface:
         return np.array(self._state_buffer[-1].O_T_EE).reshape(4, 4).transpose()
 
     @property
+    def last_joint_torques(self) -> np.ndarray:
+        """_summary_
+
+        Returns:
+            np.ndarray: The 4x4 homogeneous matrix of end effector pose.
+        """
+        if self.state_buffer_size == 0:
+            return None
+        return np.array(self._state_buffer[-1].tau_J)
+
+    @property
+    def last_d_joint_torques(self) -> np.ndarray:
+        """_summary_
+
+        Returns:
+            np.ndarray: The 4x4 homogeneous matrix of end effector pose.
+        """
+        if self.state_buffer_size == 0:
+            return None
+        return np.array(self._state_buffer[-1].dtau_J)
+
+
+    @property
     def last_eef_rot_and_pos(self) -> Tuple[np.ndarray, np.ndarray]:
         """_summary_
 
@@ -603,6 +628,18 @@ class FrankaInterface:
         if self.state_buffer_size == 0:
             return None
         return np.array(self._state_buffer[-1].q_d)
+
+    @property
+    def last_qd_d(self) -> np.ndarray:
+        if self.state_buffer_size == 0:
+            return None
+        return np.array(self._state_buffer[-1].dq_d)
+
+    @property
+    def last_qdd_d(self) -> np.ndarray:
+        if self.state_buffer_size == 0:
+            return None
+        return np.array(self._state_buffer[-1].ddq_d)
 
     @property
     def last_gripper_q(self) -> np.ndarray:

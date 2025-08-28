@@ -1,10 +1,10 @@
 PC:
-  NAME: "rosie"
-  IP: 172.16.0.1
+  NAME: "hanyang-coldbrewTMP"
+  IP: 172.16.0.5
 
 NUC:
-  NAME: "charmander"
-  IP: 172.16.0.3
+  NAME: "baskin3"
+  IP: 172.16.0.1
   PUB_PORT: 5556
   SUB_PORT: 5555
   GRIPPER_PUB_PORT: 5558
