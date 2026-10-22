@@ -81,6 +81,11 @@ def get_default_controller_config(controller_type: str) -> EasyDict:
             os.path.join(config_root, "osc-pose-controller.yml")
         ).as_easydict()
         controller_cfg = verify_controller_config(controller_cfg)
+    elif controller_type == "OSC_POSE_PRECISE":
+        controller_cfg = YamlConfig(
+            os.path.join(config_root, "osc-pose-precise-controller.yml")
+        ).as_easydict()
+        controller_cfg = verify_controller_config(controller_cfg)
     elif controller_type == "OSC_POSITION":
         controller_cfg = YamlConfig(
             os.path.join(config_root, "osc-position-controller.yml")
@@ -185,6 +190,29 @@ def verify_controller_config(controller_cfg: dict, use_default=True):
                 controller_cfg["action_scale"]["rotation"] = 1.0
                 logger.warning("field rotation in action_scale not specified!!!")
                 field_missing = True
+
+    elif controller_cfg["controller_type"] == "OSC_POSE_PRECISE":
+        # Defaults match config/osc-pose-precise-controller.yml
+        defaults = {
+            "action_scale": {"translation": 0.01, "rotation": 0.05},
+            "damping": 1e-4,
+            "max_dq": 0.1,
+            "joint_limit_margin": 0.05,
+            "traj_interpolator_cfg": {"traj_interpolator_type": "LINEAR_JOINT_POSITION", "time_fraction": 0.3},
+            "joint_kp": [200.0, 200.0, 200.0, 200.0, 150.0, 300.0, 100.0],
+            "joint_kd": [20.0, 20.0, 20.0, 20.0, 7.5, 15.0, 5.0],
+        }
+        for key, value in defaults.items():
+            if not check_attr(controller_cfg, key):
+                controller_cfg[key] = EasyDict(value) if isinstance(value, dict) else value
+                logger.warning(f"field {key} not specified!!!")
+                field_missing = True
+        for key in ("translation", "rotation"):
+            if not check_attr(controller_cfg["action_scale"], key):
+                controller_cfg["action_scale"][key] = defaults["action_scale"][key]
+                logger.warning(f"field {key} in action_scale not specified!!!")
+                field_missing = True
+        assert len(controller_cfg.joint_kp) == 7 and len(controller_cfg.joint_kd) == 7
 
     elif controller_cfg["controller_type"] == "JOINT_IMPEDANCE":
         if not check_attr(controller_cfg, "traj_interpolator_cfg"):

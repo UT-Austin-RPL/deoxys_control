@@ -17,3 +17,4 @@ deoxys/logs
 __pycache__
 data_collection_example
 *_pb2.py
+deoxys/deoxys/proto/

@@ -1,3 +1,4 @@
+import copy
 import logging
 import threading
 import time
@@ -9,6 +10,7 @@ import zmq
 
 import deoxys.proto.franka_interface.franka_controller_pb2 as franka_controller_pb2
 import deoxys.proto.franka_interface.franka_robot_state_pb2 as franka_robot_state_pb2
+from deoxys.franka_interface.osc_pose_precise import PandaJacobian, osc_pose_precise_joint_target
 from deoxys.franka_interface.visualizer import visualizer_factory
 from deoxys.utils import transform_utils
 from deoxys.utils.config_utils import verify_controller_config
@@ -152,6 +154,7 @@ class FrankaInterface:
             self.visualizer = visualizer_factory(backend="pybullet")
 
         self._last_controller_type = "Dummy"
+        self._osc_pose_precise_kinematics = None  # created on the first OSC_POSE_PRECISE command
 
         self.last_gripper_dim = -1
         self.last_gripper_action = 0
@@ -250,6 +253,12 @@ class FrankaInterface:
             if 0.0001 < remaining_time < self._control_timeout:
                 time.sleep(remaining_time)
             self.last_time = time.time_ns()
+
+        if controller_type == "OSC_POSE_PRECISE":
+            # Runs on the NUC's joint impedance controller: turn the pose delta into a joint target here, from the
+            # newest state, then send it down the JOINT_IMPEDANCE path below. See osc_pose_precise.py.
+            action, controller_cfg = self._osc_pose_precise_to_joint_impedance(action, controller_cfg)
+            controller_type = "JOINT_IMPEDANCE"
 
         if self._last_controller_type != controller_type:
             self.preprocess()
@@ -487,6 +496,25 @@ class FrankaInterface:
         if self.use_visualizer and len(self._state_buffer) > 0:
             self.visualizer.update(joint_positions=np.array(self._state_buffer[-1].q))
 
+    def _osc_pose_precise_to_joint_impedance(self, action: np.ndarray, controller_cfg) -> Tuple[np.ndarray, dict]:
+        """OSC_POSE_PRECISE action and config -> the equivalent JOINT_IMPEDANCE action and config."""
+        assert controller_cfg is not None
+        assert len(action) == 7, f"OSC_POSE_PRECISE expects [dx, dy, dz, ax, ay, az, gripper], got {len(action)} values"
+        if self.state_buffer_size == 0:
+            raise RuntimeError("OSC_POSE_PRECISE needs the robot state, but none has been received yet")
+        controller_cfg = verify_controller_config(controller_cfg, use_default=True)
+        if self._osc_pose_precise_kinematics is None:
+            self._osc_pose_precise_kinematics = PandaJacobian()
+        # q and O_T_EE from one state message, so the Jacobian and the pose it is evaluated at agree.
+        state = self._state_buffer[-1]
+        q = np.array(state.q)
+        O_T_EE = np.array(state.O_T_EE).reshape(4, 4).transpose()
+        q_target = osc_pose_precise_joint_target(action, q, O_T_EE, controller_cfg, self._osc_pose_precise_kinematics)
+        joint_cfg = copy.deepcopy(controller_cfg)
+        joint_cfg.controller_type = "JOINT_IMPEDANCE"
+        joint_cfg.is_delta = False
+        return np.concatenate([q_target, action[6:7]]), joint_cfg
+
     def gripper_control(self, action: float):
         """Control the gripper
 
@@ -514,7 +542,7 @@ class FrankaInterface:
             grasp_msg = franka_controller_pb2.FrankaGripperGraspMessage()
             grasp_msg.width = -0.01
             grasp_msg.speed = 0.5
-            grasp_msg.force = 30.0
+            grasp_msg.force = 40.0
             grasp_msg.epsilon_inner = 0.08
             grasp_msg.epsilon_outer = 0.08
 

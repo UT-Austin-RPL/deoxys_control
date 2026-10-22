@@ -10,4 +10,4 @@ numba
 termcolor
 simplejson
 mujoco==3.1.0
-
+jrl2 @ git+https://github.com/jstmn/Jrl2.git@08a0222b63b96994e43c73ea9a7f25eb8ea328d1

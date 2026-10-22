@@ -1,0 +1,34 @@
+# OSC_POSE's action interface ([dx, dy, dz, ax, ay, az, gripper], base frame, is_delta), tracked through the joint
+# impedance controller: each control() call takes one IK step toward `current pose + delta` and sends the joint target
+# as a JOINT_IMPEDANCE command. See deoxys/franka_interface/osc_pose_precise.py.
+controller_type: OSC_POSE_PRECISE
+
+is_delta: true
+
+# Largest step per control() call, in m / rad: the translation and rotation parts of the action are each limited to
+# norm 1. Unlike OSC_POSE the step is actually taken, so this is a speed limit: at the 20 Hz policy rate, 0.01 m and
+# 0.05 rad are 0.2 m/s and 1 rad/s.
+action_scale:
+  translation: 0.01
+  rotation: 0.05
+
+# IK step (damped least squares)
+damping: 0.0001
+max_dq: 0.1               # rad, largest joint step per call
+joint_limit_margin: 0.05  # rad, joint targets are kept this far inside the joint limits
+
+# The joint impedance controller the targets are sent to. Gains are 2x deoxys' joint-impedance-controller.yml.
+traj_interpolator_cfg:
+  traj_interpolator_type: LINEAR_JOINT_POSITION
+  time_fraction: 0.3
+
+joint_kp: [200., 200., 200., 200., 150., 300., 100.]
+joint_kd: [20., 20., 20., 20., 7.5, 15.0, 5.0]
+
+state_estimator_cfg:
+  is_estimation: true
+  state_estimator_type: EXPONENTIAL_SMOOTHING
+  alpha_q: 0.9
+  alpha_dq: 0.9
+  alpha_eef: 1.0
+  alpha_eef_vel: 1.0

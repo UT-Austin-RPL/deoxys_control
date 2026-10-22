@@ -24,14 +24,22 @@ from termcolor import cprint
 
 import numpy as np
 
+# --- LOCAL PATCH (earlgrey) ---
+# The pip `hidapi` package ships two backends: `hid` (libusb) and `hidraw`.
+# The libusb backend needs write access to /dev/bus/usb/<bus>/<dev>, which is
+# root-only by default, so `open()` fails as a normal user. The hidraw backend
+# uses /dev/hidraw*, which udev/99-spacemouse.rules already opens up. Prefer it
+# and fall back to libusb so this stays portable.
 try:
-    import hid
-except ModuleNotFoundError as exc:
-    raise ImportError(
-        "Unable to load module hid, required to interface with SpaceMouse. "
-        "Only Mac OS X is officially supported. Install the additional "
-        "requirements with `pip install -r requirements-ik.txt`"
-    ) from exc
+    import hidraw as hid
+except ModuleNotFoundError:
+    try:
+        import hid
+    except ModuleNotFoundError as exc:
+        raise ImportError(
+            "Unable to load module hid or hidraw, required to interface with SpaceMouse. "
+            "Install with `pip install hidapi`."
+        ) from exc
 
 from deoxys.utils.transform_utils import rotation_matrix
 
@@ -280,9 +288,33 @@ class SpaceMouse:
                         self.x = convert(d[3], d[4])
                         self.z = convert(d[5], d[6]) * -1.0
 
-                        self.roll = convert(d[7], d[8])
-                        self.pitch = convert(d[9], d[10])
-                        self.yaw = convert(d[11], d[12])
+                        # --- LOCAL PATCH (earlgrey) ---
+                        # Newer SpaceMouse models pack translation AND rotation into one
+                        # 13-byte report. The classic SpaceNavigator (046d:c626) uses the
+                        # older protocol: report 1 is translation only (7 bytes) and
+                        # rotation arrives separately as report 2. Reading d[7:] on a
+                        # 7-byte report raised IndexError and killed the reader thread.
+                        if len(d) >= 13:
+                            self.roll = convert(d[7], d[8])
+                            self.pitch = convert(d[9], d[10])
+                            self.yaw = convert(d[11], d[12])
+
+                        self._control = [
+                            self.x,
+                            self.y,
+                            self.z,
+                            self.roll,
+                            self.pitch,
+                            self.yaw,
+                        ]
+
+                    elif d[0] == 2 and len(d) >= 7:
+                        # --- LOCAL PATCH (earlgrey) ---
+                        # Classic SpaceNavigator rotation report. If an axis comes out
+                        # inverted on your unit, flip the sign here.
+                        self.roll = convert(d[1], d[2])
+                        self.pitch = convert(d[3], d[4])
+                        self.yaw = convert(d[5], d[6])
 
                         self._control = [
                             self.x,
